@@ -15,6 +15,15 @@
   'use strict';
   var C = CheckIn.CONFIG, R = CheckIn.Render, A = CheckIn.Anim, T = CheckIn.Tutorial;
 
+  // Surface forgotten async errors loudly instead of dying silently.
+  window.addEventListener('unhandledrejection', function (e) {
+    (window.__trace = window.__trace || []).push(['UNHANDLED', String(e.reason && e.reason.message || e.reason)]);
+    console.error('Unhandled async error:', e.reason);
+  });
+  window.addEventListener('error', function (e) {
+    (window.__trace = window.__trace || []).push(['PAGEERROR', String(e.message)]);
+  });
+
   var game = null;
 
   /* ---- UI state ----------------------------------------------------------- */
@@ -33,8 +42,15 @@
   };
   var humanResolve = null;        // resolves while we wait for the human's move
 
-  function awaitHuman() { return new Promise(function (res) { humanResolve = res; }); }
-  function resolveHuman() { var r = humanResolve; humanResolve = null; if (r) r(); }
+  function awaitHuman() {
+    (window.__trace = window.__trace || []).push(['awaitHuman', game.state, ui.mode]);
+    return new Promise(function (res) { humanResolve = res; });
+  }
+  function resolveHuman() {
+    (window.__trace = window.__trace || []).push(['resolveHuman', game ? game.state : '-', ui.mode,
+      (humanResolve ? 'resolved' : 'NO-OP')]);
+    var r = humanResolve; humanResolve = null; if (r) r();
+  }
 
   /* ---- preview (live calculator) ------------------------------------------ */
   function computePreview() {
@@ -227,8 +243,9 @@
     $('real-help-footer').textContent = C.REAL_HELP_NOTE;
     R.screen('game');
     render();
-    await T.maybeAutoStart();
-    await playRound();
+    while (!game.isOver) {
+      await playRound();
+    }
   }
 
   async function playRound() {
@@ -241,6 +258,8 @@
     var oppHands = document.querySelectorAll('#zone-opponents .opp-hand');
     Array.prototype.forEach.call(oppHands, function (h) { A.dealChildren(h, 35); });
     await A.sleep(250);
+
+    if (game.round === 0) await T.maybeAutoStart();   // first-load walkthrough
 
     await actionPhase(1);
     ui.phaseText = 'Turn dealt!';
@@ -283,10 +302,12 @@
   }
 
   async function showdownPhase() {
+    (window.__trace = window.__trace || []).push(['showdownPhase-enter', game.state]);
     ui.phaseText = 'Showdown — pick 4 of your 6';
     ui.mode = 'showdown';
     ui.showdownSel = [];
     render();
+    (window.__trace = window.__trace || []).push(['showdownPhase-await', game.state, 'waiting=' + !!humanResolve]);
     await awaitHuman();                    // human plays + sees scoring overlay
 
     for (var i = 1; i < game.players.length; i++) {
@@ -471,4 +492,12 @@
   });
 
   $('btn-play-hand').addEventListener('click', onPlayHand);
+
+  /* Debug hook — open the console and inspect `CheckInDebug` while playing.
+     Handy while extending the game; harmless in production. */
+  window.CheckInDebug = {
+    get ui() { return ui; },
+    get game() { return game; },
+    get waitingForHuman() { return !!humanResolve; },
+  };
 })();

@@ -176,7 +176,8 @@
       lesson: 'Breaking screen addiction requires a balanced routine.',
       debuffKind: 'chips',
       debuff: function (ctx, m) {
-        m.zeroCardChips(ctx.first.uid, 'Doomscroll: first card scores 0');
+        // ctx.first is null when nothing is played yet (live calculator at 0/4)
+        if (ctx.first) m.zeroCardChips(ctx.first.uid, 'Doomscroll: first card scores 0');
       },
       bonus: function (ctx, m) {
         if (ctx.uniqueSuits >= 3) m.addChips(15, 'Balanced routine: +15 Chips');

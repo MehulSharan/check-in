@@ -165,6 +165,13 @@ test('stacked debuffs: S04 + S06 both hit ACADEMIC (11−3−2=6)', function () 
   eq(score(['T12'], ['S04', 'S06']).chips, 6);
 });
 
+test('S08 Doomscroll: empty selection must not crash the live calculator', function () {
+  var r = score([], ['S08']);
+  eq(r.score, 0);
+  var full = score([], ['S01', 'S02', 'S03', 'S07', 'S08']);
+  eq(full.score, 0, 'empty hand vs a full 5-symptom board');
+});
+
 /* ---------------------------------------------------------------------- */
 process.stdout.write('\n=== SCORING: toolkit card bonuses ===\n');
 
