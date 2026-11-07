@@ -397,7 +397,8 @@ process.stdout.write('\n=== DECK & ROUND STATE MACHINE ===\n');
     ok(a.hand.some(function (c) { return c.uid === take.uid; }), 'receiver got the card');
     ok(b.hand.some(function (c) { return c.uid === give.uid; }), 'initiator passed the card on');
     eq(a.tradesThisRound, 1); eq(b.tradesThisRound, 1);
-    var r = S.scoreHand({ played: [a.hand[0]], board: [], trades: a.tradesThisRound });
+    var probe = { uid: 'probe-mult', def: CheckIn.cardById('T01') };   // +12 chips, no mult
+    var r = S.scoreHand({ played: [probe], board: [], trades: a.tradesThisRound });
     eq(r.mult, 3, '1× base + 2× trade bonus');
   });
 
@@ -407,7 +408,8 @@ process.stdout.write('\n=== DECK & ROUND STATE MACHINE ===\n');
     g.doTrade(0, 1, g.players[0].hand[0].uid, g.players[1].hand[0].uid);   // 0 initiates
     g.doTrade(2, 0, g.players[2].hand[0].uid, g.players[0].hand[0].uid);   // 0 receives (free)
     eq(g.players[0].tradesThisRound, 2);
-    var r = S.scoreHand({ played: [g.players[0].hand[0]], board: [], trades: g.players[0].tradesThisRound });
+    var probe = { uid: 'probe-mult2', def: CheckIn.cardById('T01') };
+    var r = S.scoreHand({ played: [probe], board: [], trades: g.players[0].tradesThisRound });
     eq(r.mult, 5, '1× + 2×2 trade');
   });
 

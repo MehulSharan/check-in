@@ -87,7 +87,8 @@
 /* ---- symptom card (community board) -------------------------------------- */
 .symptom-card {
   width: 138px;
-  height: 168px;
+  min-height: 168px;
+  height: auto;                 /* long recognition text may grow the card */
   padding: 9px 10px;
   display: flex;
   flex-direction: column;
@@ -122,7 +123,8 @@
 
 /* empty community slot */
 .community-slot {
-  width: 138px; height: 168px;
+  width: 138px;
+  min-height: 168px;
   border-radius: var(--radius);
   border: 2px dashed var(--line);
   background: rgba(255, 255, 255, 0.35);

@@ -86,9 +86,9 @@
       if (opts.dim) e.classList.add('dim');
       if (opts.finalChips != null) {
         var fin = el('div', 'tk-final');
-        fin.textContent = (opts.finalChips ? '+' + opts.finalChips + 'chips' : '') +
+        fin.textContent = (opts.finalChips ? '+' + opts.finalChips + ' chips' : '') +
           (opts.finalMult ? ' +' + opts.finalMult + '×' : '');
-        if (!fin.textContent) fin.textContent = '0';
+        if (!fin.textContent) fin.textContent = '0 chips';
         e.appendChild(fin);
       }
       if (opts.onclick) {

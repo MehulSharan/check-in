@@ -65,23 +65,31 @@
         function position() {
           var step = STEPS[idx];
           var target = document.querySelector(step.target);
+          // set the content first so offsetHeight is accurate for placement
+          stepNum.textContent = step.title;
+          textEl.innerHTML = step.html;
+          btnNext.textContent = idx === STEPS.length - 1 ? "Let's play!" : 'Next';
           if (target) {
             var r = target.getBoundingClientRect();
             Object.assign(spotlight.style, {
               top: (r.top - 10) + 'px', left: (r.left - 10) + 'px',
               width: (r.width + 20) + 'px', height: (r.height + 20) + 'px',
             });
-            // place the coach card under the spotlight if there's room, else above
+            // Place the coach card below the spotlight if there is room
+            // before the player's hand zone; otherwise above the spotlight,
+            // anchored by the card's real height so it never dips into it.
+            var cardH = card.offsetHeight || 230;
             var below = r.bottom + 20;
-            var roomBelow = window.innerHeight - below > 240;
-            card.style.top = roomBelow
-              ? Math.min(below, window.innerHeight - 260) + 'px'
-              : Math.max(16, r.top - 210) + 'px';
+            var handZone = document.getElementById('zone-player');
+            var limit = handZone ? handZone.getBoundingClientRect().top - 16
+                                 : window.innerHeight - 20;
+            if (limit - below > cardH + 12) {
+              card.style.top = below + 'px';
+            } else {
+              card.style.top = Math.max(14, r.top - cardH - 14) + 'px';
+            }
             card.style.left = Math.max(16, Math.min(r.left, window.innerWidth - 420)) + 'px';
           }
-          stepNum.textContent = step.title;
-          textEl.innerHTML = step.html;
-          btnNext.textContent = idx === STEPS.length - 1 ? "Let's play!" : 'Next';
         }
 
         function finish() {

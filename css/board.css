@@ -72,6 +72,7 @@
   display: flex;
   gap: 10px;
   justify-content: center;
+  align-items: stretch;
   flex-wrap: wrap;
 }
 
@@ -150,13 +151,16 @@
 
 /* ---- scoring overlay content ------------------------------------------------- */
 .score-wrap { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
-.score-cards { display: flex; gap: 8px; flex-wrap: wrap; max-width: 260px; }
-.score-cards .toolkit-card { width: 100px; height: 134px; cursor: default; }
+.score-cards { display: flex; gap: 14px; flex-wrap: wrap; max-width: 290px; justify-content: center; align-items: stretch; }
+.score-cards .toolkit-card { width: 96px; height: auto; min-height: 142px; cursor: default; }
 .score-cards .toolkit-card:hover { transform: none; }
 .score-cards .tk-final {
-  position: absolute; bottom: 4px; right: 6px;
+  position: static; text-align: right;
+  margin-top: 3px; white-space: nowrap;
   font-size: 0.66rem; font-weight: 900; color: var(--ink-soft);
+  border-top: 1px dashed var(--line); padding-top: 2px;
 }
+.score-cards .tk-bonus { margin-bottom: 0; }
 .breakdown { flex: 1 1 300px; min-width: 260px; }
 .breakdown-title { font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin-bottom: 6px; }
 .bd-line {
@@ -207,7 +211,7 @@
 @media (max-width: 720px) {
   .toolkit-card { width: 92px; height: 132px; }
   .tk-value { font-size: 1.15rem; }
-  .symptom-card, .community-slot { width: 108px; height: 148px; }
+  .symptom-card, .community-slot { width: 108px; min-height: 148px; }
   .sym-row { font-size: 0.53rem; }
   .opponent { min-width: 100%; }
 }
