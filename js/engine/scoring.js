@@ -162,9 +162,11 @@
 
     // 6. aggregate ------------------------------------------------------
     var chips = 0;
+    var cardScores = [];
     ctx.played.forEach(function (c) {
       var cc = m.zeroed[c.uid] ? 0 : Math.max(0, m.cardChips[c.uid] || 0);
       chips += cc;
+      cardScores.push({ uid: c.uid, defId: c.def.id, chips: cc, mult: m.cardMult[c.uid] || 0 });
     });
     m.flatChips.forEach(function (f) { chips += f.delta; });
     if (m.chipCap !== null) chips = Math.min(chips, m.chipCap);
@@ -187,7 +189,8 @@
     }
     m.log.push({ kind: 'result', label: 'Final', chips: chips, mult: mult, score: score });
 
-    return { chips: chips, mult: mult, score: score, log: m.log, wildAssign: assign, ctx: ctx };
+    return { chips: chips, mult: mult, score: score, log: m.log, wildAssign: assign, ctx: ctx,
+      cardScores: cardScores };
   }
 
   /* ------------------------------------------------------------------ */

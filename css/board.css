@@ -1,0 +1,213 @@
+/* Check In — css/board.css
+   The three game zones: opponents (top), community board + calculator
+   (middle), player area (bottom). Desktop-first; wraps gracefully. */
+
+#screen-game {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 18px 14px;
+}
+
+/* ---- top bar ------------------------------------------------------------- */
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 2px 8px;
+}
+#round-indicator { font-weight: 700; color: var(--ink-soft); font-size: 0.95rem; }
+#phase-label { color: var(--ink); }
+.topbar-logo { font-weight: 900; letter-spacing: 0.12em; color: #d8c9a7; font-size: 1.05rem; }
+#btn-tutorial {
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  width: 38px; height: 38px;
+  font-weight: 900;
+  color: var(--ink-soft);
+  background: var(--card-face);
+}
+
+/* ---- TOP ZONE — opponents -------------------------------------------------- */
+#zone-opponents {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.opponent {
+  background: var(--card-face);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 10px 14px 12px;
+  min-width: 320px;
+  flex: 1 1 380px;
+  max-width: 480px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.opponent.active { border-color: #f0b429; box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.35), var(--shadow); }
+.opp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.opp-emoji { font-size: 1.3rem; }
+.opp-name { font-weight: 800; }
+.opp-bank { margin-left: auto; font-weight: 900; color: var(--chip-blue); }
+.opp-trade-badges { font-size: 0.8rem; }
+.opp-hand { display: flex; gap: 6px; flex-wrap: wrap; }
+.opp-last { margin-top: 8px; font-size: 0.78rem; color: var(--ink-soft); font-weight: 700; }
+.opp-last b { color: var(--ink); }
+
+/* ---- MIDDLE ZONE — board ---------------------------------------------------- */
+#zone-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0 6px;
+}
+.board-label { font-weight: 800; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 8px; }
+.board-sub { font-weight: 500; opacity: 0.75; }
+#community-slots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#calculator {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 14px;
+  background: var(--card-face);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 10px 26px;
+  box-shadow: var(--shadow);
+}
+.calc-chips, .calc-mult, .calc-score { font-weight: 900; font-variant-numeric: tabular-nums; }
+.calc-chips { color: var(--chip-blue); font-size: 1.9rem; }
+.calc-mult { color: var(--mult-red); font-size: 1.9rem; }
+.calc-score { color: var(--ink); font-size: 2.2rem; }
+.calc-op { color: var(--ink-soft); font-size: 1.3rem; font-weight: 700; }
+#calc-note { font-size: 0.75rem; color: var(--ink-soft); max-width: 210px; line-height: 1.3; }
+
+#event-log {
+  margin-top: 10px;
+  min-height: 44px;
+  max-width: 760px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-align: center;
+  line-height: 1.5;
+}
+#event-log .log-line { opacity: 0.9; }
+#event-log .log-line.latest { color: var(--ink); font-weight: 700; }
+
+/* ---- BOTTOM ZONE — player ---------------------------------------------------- */
+#zone-player {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0 4px;
+}
+#player-strip { display: flex; align-items: center; gap: 14px; }
+#player-avatar { font-weight: 900; }
+#player-bank { font-weight: 900; color: var(--chip-blue); }
+#player-trades { font-size: 0.85rem; }
+
+#hint-bar {
+  background: #fdf6e3;
+  border: 1.5px solid #f0e2bd;
+  color: #7a5b12;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+#player-hand {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 170px;
+  align-items: flex-end;
+  padding-top: 14px;
+}
+
+#action-bar { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 4px 0 2px; }
+
+#real-help-footer {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--mind);
+  padding: 6px 0 2px;
+}
+
+/* ---- scoring overlay content ------------------------------------------------- */
+.score-wrap { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+.score-cards { display: flex; gap: 8px; flex-wrap: wrap; max-width: 260px; }
+.score-cards .toolkit-card { width: 100px; height: 134px; cursor: default; }
+.score-cards .toolkit-card:hover { transform: none; }
+.score-cards .tk-final {
+  position: absolute; bottom: 4px; right: 6px;
+  font-size: 0.66rem; font-weight: 900; color: var(--ink-soft);
+}
+.breakdown { flex: 1 1 300px; min-width: 260px; }
+.breakdown-title { font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin-bottom: 6px; }
+.bd-line {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: 0.82rem; padding: 3px 8px;
+  border-radius: 7px;
+  animation: slideIn 0.25s ease both;
+}
+.bd-line .bd-label { color: var(--ink); }
+.bd-line .bd-delta { font-weight: 900; white-space: nowrap; }
+.bd-line .d-chips { color: var(--chip-blue); }
+.bd-line .d-mult { color: var(--mult-red); }
+.bd-line.kind-zero .bd-label, .bd-line.kind-cap .bd-label, .bd-line.kind-lock .bd-label { color: var(--bad); }
+.bd-line.kind-suppressed { color: var(--good); font-weight: 700; }
+.bd-line.kind-wild { color: var(--wild); font-style: italic; }
+.bd-total { border-top: 2px solid var(--line); margin-top: 8px; padding-top: 8px; font-size: 1.05rem; font-weight: 900; }
+
+/* ---- lessons ------------------------------------------------------------------- */
+.lesson-list { display: flex; flex-direction: column; gap: 10px; }
+.lesson-item {
+  display: flex; gap: 12px; align-items: center;
+  background: var(--cream);
+  border-radius: 12px;
+  padding: 10px 14px;
+  animation: slideIn 0.3s ease both;
+}
+.lesson-icon { font-size: 1.6rem; }
+.lesson-name { font-weight: 900; font-size: 0.9rem; }
+.lesson-text { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.4; }
+
+/* ---- round results / podium ------------------------------------------------------ */
+.results-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.results-table th, .results-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+.results-table th { color: var(--ink-soft); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.results-table td.num { font-weight: 900; color: var(--chip-blue); font-variant-numeric: tabular-nums; }
+.podium-medal { font-size: 2rem; margin-bottom: 4px; }
+.game-stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+.stat-chip {
+  background: var(--cream);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.stat-chip b { color: var(--ink); }
+
+@media (max-width: 720px) {
+  .toolkit-card { width: 92px; height: 132px; }
+  .tk-value { font-size: 1.15rem; }
+  .symptom-card, .community-slot { width: 108px; height: 148px; }
+  .sym-row { font-size: 0.53rem; }
+  .opponent { min-width: 100%; }
+}

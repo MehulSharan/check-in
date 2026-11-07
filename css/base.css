@@ -1,0 +1,163 @@
+/* Check In — css/base.css
+   Foundation: reset, palette tokens, screens, buttons, modal layer. */
+
+:root {
+  --cream: #faf3e7;
+  --cream-deep: #f1e6d2;
+  --ink: #33302b;
+  --ink-soft: #6f675a;
+  --card-face: #fffdf8;
+  --line: #e3d7c2;
+
+  --mind: #3e7cb1;
+  --body: #3f9d6b;
+  --social: #d99e17;
+  --academic: #8256ad;
+  --wild: #c97d0c;
+
+  --chip-blue: #2f6db8;
+  --mult-red: #c24545;
+  --good: #3f9d6b;
+  --bad: #c24545;
+
+  --shadow: 0 2px 10px rgba(90, 70, 30, 0.14);
+  --shadow-lift: 0 8px 24px rgba(90, 70, 30, 0.22);
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, #fdf8ee 0%, var(--cream) 60%);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen { min-height: 100vh; }
+.hidden { display: none !important; }
+
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+button:disabled { cursor: not-allowed; opacity: 0.45; }
+
+/* ---- buttons --------------------------------------------------------- */
+.btn {
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+  user-select: none;
+}
+.btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+
+.btn-primary {
+  background: linear-gradient(180deg, #ffb84d, #f09c1f);
+  color: #4a2f04;
+  box-shadow: 0 3px 0 #c97d0c, var(--shadow);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+
+.btn-secondary {
+  background: #fffdf8;
+  color: var(--ink);
+  border: 2px solid var(--line);
+  box-shadow: 0 2px 0 var(--line);
+}
+.btn-secondary:hover:not(:disabled) { border-color: #d3c3a4; }
+
+.btn-ghost { color: var(--ink-soft); padding: 8px 14px; }
+.btn-ghost:hover:not(:disabled) { color: var(--ink); }
+
+.btn-big { font-size: 1.15rem; padding: 14px 30px; }
+.btn-danger { background: var(--mult-red); color: #fff; }
+.btn:disabled { box-shadow: none; }
+
+/* ---- title screen ------------------------------------------------------ */
+#screen-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.title-card {
+  max-width: 620px;
+  background: var(--card-face);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lift);
+  padding: 42px 46px 30px;
+  text-align: center;
+}
+.title-suits { font-size: 1.5rem; letter-spacing: 10px; margin-bottom: 6px; }
+.logo {
+  font-size: clamp(2.6rem, 7vw, 4rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  line-height: 1.05;
+}
+.tagline {
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin: 6px 0 18px;
+}
+.pitch { color: var(--ink-soft); line-height: 1.55; margin-bottom: 26px; text-align: left; }
+.pitch b { color: var(--ink); }
+.title-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+.title-footnote { color: var(--ink-soft); font-size: 0.85rem; }
+.title-sub { color: var(--ink-soft); font-size: 0.78rem; margin-top: 14px; }
+.title-help { color: var(--mind); font-size: 0.8rem; margin-top: 6px; }
+
+/* ---- modal layer -------------------------------------------------------- */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(51, 48, 43, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  animation: fadeIn 0.18s ease;
+}
+#modal-card {
+  background: var(--card-face);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lift);
+  padding: 26px 30px;
+  max-width: 640px;
+  width: min(640px, 94vw);
+  max-height: 88vh;
+  overflow: auto;
+  animation: popIn 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+#modal-card h2 { margin-bottom: 12px; font-size: 1.3rem; }
+#modal-card p { color: var(--ink-soft); line-height: 1.5; }
+.modal-buttons { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+.modal-buttons .btn { min-width: 120px; }
+
+/* ---- tutorial overlay ------------------------------------------------------ */
+#tutorial-layer { position: fixed; inset: 0; z-index: 300; }
+#tutorial-spotlight {
+  position: absolute;
+  border-radius: 18px;
+  box-shadow: 0 0 0 4000px rgba(51, 48, 43, 0.55);
+  border: 3px solid #f0b429;
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+#tutorial-card {
+  position: absolute;
+  width: min(410px, 92vw);
+  background: var(--card-face);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lift);
+  padding: 20px 22px 16px;
+}
+#tutorial-step-num { font-weight: 900; margin-bottom: 8px; }
+#tutorial-text { line-height: 1.55; color: var(--ink-soft); font-size: 0.92rem; }
+#tutorial-text b { color: var(--ink); }
+#tutorial-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }

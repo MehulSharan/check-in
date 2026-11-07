@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check In — a coping card game</title>
+  <meta name="description" content="A Texas Hold'em-inspired coping card game with Balatro-style scoring. Chips are points, not bets — score by pairing self-care with help-seeking. Mental Health Toolkit 2.0 / TLIG Board Game 2026, University of Nottingham Malaysia.">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/board.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+  <!-- ============================== TITLE SCREEN ============================== -->
+  <div id="screen-title" class="screen">
+    <div class="title-card">
+      <div class="title-suits">🧠 🏃 💬 📚 🌟</div>
+      <h1 class="logo">CHECK&nbsp;IN</h1>
+      <div class="tagline">a coping card game</div>
+      <p class="pitch">
+        Poker's flop, turn and river — <b>no betting, no bluffing</b>.
+        Shared <b>Symptom</b> cards reshape the table; your face-up
+        <b>Self-Care</b> cards bank Chips, <b>Help-Seeking</b> cards multiply
+        them, and trading with a classmate pays you <i>both</i>.
+        Highest chip bank after 3 rounds wins.
+      </p>
+      <div class="title-buttons">
+        <button id="btn-play" class="btn btn-primary btn-big">▶&nbsp; Play vs Bots</button>
+        <button id="btn-how" class="btn btn-secondary btn-big">How to play</button>
+      </div>
+      <p class="title-footnote">1 human vs 2 AI classmates · ~6 minutes</p>
+      <p class="title-sub">Mental Health Toolkit 2.0 · TLIG Board Game 2026 · University of Nottingham Malaysia</p>
+      <p class="title-help">This is a game. If you are struggling for real, the UNM Wellbeing Office drop-in is free.</p>
+    </div>
+  </div>
+
+  <!-- ============================== GAME SCREEN =============================== -->
+  <div id="screen-game" class="screen hidden">
+
+    <header id="topbar">
+      <div id="round-indicator">Round 1 of 3 · <span id="phase-label">Dealing…</span></div>
+      <div class="topbar-logo">CHECK IN</div>
+      <button id="btn-tutorial" class="btn btn-ghost" title="Replay the tutorial">?</button>
+    </header>
+
+    <!-- TOP ZONE — opponents -->
+    <section id="zone-opponents" aria-label="Opponents"></section>
+
+    <!-- MIDDLE ZONE — the board -->
+    <section id="zone-board" aria-label="Community board">
+      <div class="board-label">🧯 Community Symptoms <span class="board-sub">they change how your cards score</span></div>
+      <div id="community-slots"></div>
+      <div id="calculator" title="Live score preview">
+        <span class="calc-chips" id="calc-chips">0</span>
+        <span class="calc-op">×</span>
+        <span class="calc-mult" id="calc-mult">1</span>
+        <span class="calc-op">=</span>
+        <span class="calc-score" id="calc-score">0</span>
+        <span id="calc-note"></span>
+      </div>
+      <div id="event-log" aria-live="polite"></div>
+    </section>
+
+    <!-- BOTTOM ZONE — the human player -->
+    <section id="zone-player" aria-label="Your hand">
+      <div id="player-strip">
+        <div id="player-avatar">🫵 You</div>
+        <div id="player-bank">🏦 0</div>
+        <div id="player-trades"></div>
+      </div>
+      <div id="hint-bar">…</div>
+      <div id="player-hand"></div>
+      <div id="action-bar">
+        <button id="btn-reroll" class="btn btn-secondary">🔄 Reroll</button>
+        <button id="btn-trade" class="btn btn-secondary">🤝 Offer Trade</button>
+        <button id="btn-keep" class="btn btn-ghost">⏭️ Keep Hand</button>
+        <button id="btn-play-hand" class="btn btn-primary" disabled>▶ Play Hand (0/4)</button>
+      </div>
+      <p id="real-help-footer"></p>
+    </section>
+  </div>
+
+  <!-- ============================== MODAL LAYER =============================== -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal-card"></div>
+  </div>
+
+  <!-- tutorial spotlight layer -->
+  <div id="tutorial-layer" class="hidden">
+    <div id="tutorial-spotlight"></div>
+    <div id="tutorial-card">
+      <div id="tutorial-step-num"></div>
+      <div id="tutorial-text"></div>
+      <div id="tutorial-buttons">
+        <button id="tutorial-skip" class="btn btn-ghost">Skip</button>
+        <button id="tutorial-next" class="btn btn-primary">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- engine + ui (classic scripts on purpose: runs from file:// with no build step) -->
+  <script src="js/config.js"></script>
+  <script src="js/data/cards.js"></script>
+  <script src="js/engine/scoring.js"></script>
+  <script src="js/engine/deck.js"></script>
+  <script src="js/engine/round.js"></script>
+  <script src="js/ai/bots.js"></script>
+  <script src="js/ui/render.js"></script>
+  <script src="js/ui/animations.js"></script>
+  <script src="js/ui/tutorial.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

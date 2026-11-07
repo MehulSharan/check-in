@@ -36,7 +36,7 @@
   function Game(opts) {
     this.players = (opts && opts.players || []).map(function (p) {
       return {
-        name: p.name, isBot: !!p.isBot,
+        name: p.name, isBot: !!p.isBot, emoji: p.emoji || '🤖',
         hand: [], bank: 0,
         tradesThisRound: 0, actedThisPhase: false, hasPlayed: false,
         playedCards: null, lastResult: null,
@@ -86,6 +86,7 @@
   Game.prototype._inActionPhase = function () {
     return this.state === 'ACTION_1' || this.state === 'ACTION_2';
   };
+  Game.prototype.inActionPhase = function () { return this._inActionPhase(); };
 
   Game.prototype._checkAdvance = function () {
     var g = this;

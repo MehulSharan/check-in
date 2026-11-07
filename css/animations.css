@@ -1,0 +1,73 @@
+/* Check In — css/animations.css
+   Deal/flip/pop keyframes and helper classes. JS adds .anim-* classes,
+   removes them after the animation ends. */
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes dealIn {
+  from { opacity: 0; transform: translateY(-40px) rotate(-6deg) scale(0.7); }
+  to { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+@keyframes flipIn {
+  0% { transform: rotateY(90deg) scale(0.9); opacity: 0; }
+  100% { transform: rotateY(0) scale(1); opacity: 1; }
+}
+@keyframes pulseUp {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22); color: #e0890b; }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+@keyframes floatBadge {
+  0% { opacity: 0; transform: translateY(6px); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-34px); }
+}
+
+/* deal: cards fly in from the top */
+.anim-deal { animation: dealIn 0.38s cubic-bezier(0.25, 1.2, 0.5, 1) both; }
+
+/* community card flip */
+.anim-flip { animation: flipIn 0.42s ease both; }
+
+/* number tick pulse (calculator + bank) */
+.anim-pulse { animation: pulseUp 0.5s ease; display: inline-block; }
+
+/* traded/swapped card wiggle */
+.anim-swap { animation: shake 0.4s ease; }
+
+/* floating +2 MULT badge over a player strip */
+.float-badge {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  transform: translateX(-50%);
+  background: var(--mult-red);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  padding: 3px 10px;
+  pointer-events: none;
+  animation: floatBadge 1.4s ease forwards;
+  z-index: 5;
+  white-space: nowrap;
+}
+
+/* score count-up highlight */
+#calc-score.ticking { color: #e0890b; }
+
+/* dim the board while a modal is up is handled by the overlay itself */
