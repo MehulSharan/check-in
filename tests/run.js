@@ -119,7 +119,7 @@ test('S05 Imposter: any help card → +10 chips, no cap', function () {
 
 test('S06 Conflict: ACADEMIC −2 chips; +3 mult if traded (stacks with trade bonus)', function () {
   var r = score(['T12'], ['S06'], 1);
-  eq(r.chips, 7); eq(r.mult, 1 + 3 + 2); eq(r.score, 42);
+  eq(r.chips, 9); eq(r.mult, 1 + 3 + 2); eq(r.score, 54);
 });
 
 test('S07 Bottling: no help → mult locked at 1 even with trades', function () {
@@ -161,8 +161,8 @@ test('S10 Slump: 3+1 suits = 1 pair only', function () {
   eq(r.chips, 12 + 10 + 9 + 9 + 8);
 });
 
-test('stacked debuffs: S04 + S06 both hit ACADEMIC (9−3−2=4)', function () {
-  eq(score(['T12'], ['S04', 'S06']).chips, 4);
+test('stacked debuffs: S04 + S06 both hit ACADEMIC (11−3−2=6)', function () {
+  eq(score(['T12'], ['S04', 'S06']).chips, 6);
 });
 
 /* ---------------------------------------------------------------------- */
@@ -210,11 +210,11 @@ test('T18 Check In on a Friend: +1 base, +3 if traded', function () {
 });
 test('T20 Personal Tutor: ignores ACADEMIC symptom debuffs (S01)', function () {
   var r = score(['T20', 'T12'], ['S01']);   // Pomodoro NOT zeroed
-  eq(r.chips, 9); eq(r.mult, 4);
+  eq(r.chips, 11); eq(r.mult, 4);
 });
 test('T20 Personal Tutor: ignores ACADEMIC-category symptoms only — S06 is SOCIAL, S04 is BODY', function () {
-  eq(score(['T20', 'T12'], ['S06']).chips, 7, 'S06 is a SOCIAL symptom → its −2 applies');
-  eq(score(['T20', 'T12'], ['S04']).chips, 6, 'S04 is a BODY symptom → applies');
+  eq(score(['T20', 'T12'], ['S06']).chips, 9, 'S06 is a SOCIAL symptom → its −2 applies');
+  eq(score(['T20', 'T12'], ['S04']).chips, 8, 'S04 is a BODY symptom → applies');
 });
 test('T22 Counselling: clears every CHIP debuff (S02 −5, S04 −3 gone; wild picks BODY for +8)', function () {
   var r = score(['T22', 'T06'], ['S02', 'S04']);
@@ -267,14 +267,14 @@ process.stdout.write('\n=== SCORING: bestPlay (bot showdown logic) ===\n');
 
 test('bestPlay picks help card into Imposter Syndrome board', function () {
   var best = S.bestPlay(hand(['T01', 'T04', 'T08', 'T06', 'T19', 'T12']), boardOf(['S05']), 0);
-  eq(best.result.score, 168); // Sleep+Gym+Boundaries=32 chips +10, ×(1+3 T19)
+  eq(best.result.score, 172); // Sleep+Gym+Pomodoro = 33 chips +10, ×(1+3 T19)
   ok(best.cards.some(function (c) { return c.def.id === 'T19'; }), 'must include T19');
 });
 
 test('bestPlay handles S08 by sacrificing the cheapest card first', function () {
   var best = S.bestPlay(hand(['T01', 'T06', 'T10', 'T04', 'T12', 'T08']), boardOf(['S08']), 0);
-  eq(best.result.score, 47);              // 12+10+10 survive, +15, cheapest zeroed
-  eq(best.cards[0].def.id, 'T10', 'Call Family (9) is sacrificed, not Sleep (12)');
+  eq(best.result.score, 48);              // 12+10+11 survive, +15, cheapest zeroed
+  eq(best.cards[0].def.id, 'T06', 'Journal (9) is sacrificed, not Sleep (12) or Pomodoro (11)');
 });
 
 test('bestPlay respects trade bonus in evaluation', function () {

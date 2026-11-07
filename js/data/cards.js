@@ -267,7 +267,7 @@
         if (others > 0) m.addCardChips(self.uid, 3 * others, 'Club + ' + others + ' more SOCIAL');
       } },
 
-    { id: 'T12', name: 'Pomodoro Study Technique', suit: 'ACADEMIC', icon: '⏲️', type: 'selfcare', chips: 9, mult: 0,
+    { id: 'T12', name: 'Pomodoro Study Technique', suit: 'ACADEMIC', icon: '⏲️', type: 'selfcare', chips: 11, mult: 0,
       bonusText: null, bonus: null },
 
     { id: 'T13', name: 'Break Tasks into Small Steps', suit: 'ACADEMIC', icon: '🪜', type: 'selfcare', chips: 8, mult: 0,
@@ -276,7 +276,7 @@
         if (ctx.hasSuit('MIND')) m.addCardChips(self.uid, 4, 'Small steps + MIND');
       } },
 
-    { id: 'T14', name: 'Clean Desk & Organize Notes', suit: 'ACADEMIC', icon: '🧹', type: 'selfcare', chips: 10, mult: 0,
+    { id: 'T14', name: 'Clean Desk & Organize Notes', suit: 'ACADEMIC', icon: '🧹', type: 'selfcare', chips: 12, mult: 0,
       bonusText: null, bonus: null },
   ];
 
