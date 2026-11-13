@@ -30,8 +30,11 @@
   height: 6px;
   background: var(--suit-color);
 }
-.toolkit-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lift); }
-.toolkit-card.selected {
+@media (hover: hover) {
+  .toolkit-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lift); }
+}
+.toolkit-card.selected,
+.toolkit-card.selected:hover {
   transform: translateY(-12px);
   box-shadow: 0 0 0 3px var(--suit-color), var(--shadow-lift);
 }
@@ -156,9 +159,11 @@
 .mini-card .m-val.chips { color: var(--chip-blue); }
 .mini-card .m-val.mult { color: var(--mult-red); }
 .mini-card.clickable { cursor: pointer; }
-.mini-card.clickable:hover {
-  transform: translateY(-4px) scale(1.06);
-  box-shadow: 0 0 0 3px var(--suit-color), var(--shadow-lift);
+@media (hover: hover) {
+  .mini-card.clickable:hover {
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 0 0 3px var(--suit-color), var(--shadow-lift);
+  }
 }
 .mini-card.dim { opacity: 0.45; filter: grayscale(0.4); }
 

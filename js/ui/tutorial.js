@@ -70,25 +70,37 @@
           textEl.innerHTML = step.html;
           btnNext.textContent = idx === STEPS.length - 1 ? "Let's play!" : 'Next';
           if (target) {
-            var r = target.getBoundingClientRect();
-            Object.assign(spotlight.style, {
-              top: (r.top - 10) + 'px', left: (r.left - 10) + 'px',
-              width: (r.width + 20) + 'px', height: (r.height + 20) + 'px',
-            });
-            // Place the coach card below the spotlight if there is room
-            // before the player's hand zone; otherwise above the spotlight,
-            // anchored by the card's real height so it never dips into it.
+            // On phones the page is taller than the screen, so bring the
+            // target into view first. Short targets go to the top of the
+            // screen (coach card below); tall ones are simply centred.
+            var vh = window.innerHeight, vw = window.innerWidth;
             var cardH = card.offsetHeight || 230;
+            var cardW = card.offsetWidth || 410;
+            var r = target.getBoundingClientRect();
+            if (r.top < 10 || r.bottom > vh - 10) {
+              var fitsBoth = r.height + cardH + 44 <= vh;
+              window.scrollBy(0, fitsBoth ? r.top - 16 : r.top + r.height / 2 - vh / 2);
+              r = target.getBoundingClientRect();
+            }
+            Object.assign(spotlight.style, {
+              top: (r.top - 8) + 'px', left: Math.max(2, r.left - 8) + 'px',
+              width: Math.min(vw - 4, r.width + 16) + 'px', height: (r.height + 16) + 'px',
+            });
+            // Coach card placement, in order of preference:
+            //  1. below the spotlight, without dipping into the player's hand zone
+            //  2. above the spotlight
+            //  3. below the spotlight, anywhere on screen
+            //  4. pinned to whichever screen edge is further from the target
             var below = r.bottom + 20;
             var handZone = document.getElementById('zone-player');
-            var limit = handZone ? handZone.getBoundingClientRect().top - 16
-                                 : window.innerHeight - 20;
-            if (limit - below > cardH + 12) {
-              card.style.top = below + 'px';
-            } else {
-              card.style.top = Math.max(14, r.top - cardH - 14) + 'px';
-            }
-            card.style.left = Math.max(16, Math.min(r.left, window.innerWidth - 420)) + 'px';
+            var limit = handZone ? handZone.getBoundingClientRect().top - 16 : vh - 20;
+            var top;
+            if (limit - below > cardH + 12) top = below;
+            else if (r.top - cardH - 14 >= 10) top = r.top - cardH - 14;
+            else if (below + cardH <= vh - 10) top = below;
+            else top = (r.top + r.height / 2 < vh / 2) ? vh - cardH - 10 : 10;
+            card.style.top = Math.max(10, Math.min(top, vh - cardH - 10)) + 'px';
+            card.style.left = Math.max(8, Math.min(r.left, vw - cardW - 8)) + 'px';
           }
         }
 
@@ -97,6 +109,7 @@
           btnNext.removeEventListener('click', onNext);
           btnSkip.removeEventListener('click', finish);
           window.removeEventListener('resize', position);
+          document.documentElement.classList.remove('tutorial-open');
           Tutorial.markDone();
           resolve();
         }
@@ -106,6 +119,9 @@
         }
 
         layer.classList.remove('hidden');
+        // freeze page scrolling while the spotlight is up (it is positioned
+        // against the screen, so the page must not move underneath it)
+        document.documentElement.classList.add('tutorial-open');
         position();
         btnNext.addEventListener('click', onNext);
         btnSkip.addEventListener('click', finish);

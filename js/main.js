@@ -91,6 +91,7 @@
     var myTurn = game.inActionPhase() && !human.actedThisPhase && ui.mode === 'idle';
     var bR = $('btn-reroll'), bT = $('btn-trade'), bK = $('btn-keep'), bP = $('btn-play-hand');
 
+    $('action-bar').dataset.mode = ui.mode;   // css/mobile.css shows only the buttons that matter
     bR.disabled = bT.disabled = bK.disabled = true;
     bR.textContent = '🔄 Reroll';
     bT.textContent = '🤝 Offer Trade';
@@ -146,6 +147,16 @@
     R.hint(text);
   }
 
+  /* Smooth-scroll an element into view if any of it is off-screen (the phone
+     layout is taller than the screen; on desktop this is a no-op). */
+  function reveal(node) {
+    if (!node || !node.scrollIntoView) return;
+    var r = node.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight) {
+      node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   /* ---- card click routing ---------------------------------------------------- */
   ui.onHandCardClick = function (card) {
     if (ui.mode === 'select-reroll') {
@@ -157,6 +168,7 @@
       ui.tradeGive = card.uid;
       ui.mode = 'select-target';
       render();
+      reveal($('zone-opponents'));   // phones: classmates may be scrolled off-screen
     } else if (ui.mode === 'showdown' && !game.players[0].hasPlayed) {
       var j = ui.showdownSel.indexOf(card.uid);
       if (j !== -1) ui.showdownSel.splice(j, 1);

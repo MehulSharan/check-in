@@ -1,0 +1,270 @@
+/* Check In — css/mobile.css
+   Touch polish for every screen size, then the phone layout (<= 720px wide)
+   and a compact layout for phones held sideways. Loaded last on purpose.
+
+   Phone layout in one glance:
+     top bar → two classmates side by side → symptom strip (swipe sideways)
+     → live calculator → your 6 cards in a 3 × 2 grid → action buttons
+     pinned to the bottom of the screen.                                    */
+
+/* ---- touch polish (all sizes) --------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: transparent; }
+.btn, .card, .mini-card, .opponent { touch-action: manipulation; }   /* no double-tap zoom delay */
+.card, .mini-card, #hint-bar { -webkit-user-select: none; user-select: none; }
+.m-name { display: none; }                      /* mini-card name: phones only, see below */
+html.tutorial-open { overflow: hidden; }
+#tutorial-layer { touch-action: none; }
+#tutorial-card { max-height: calc(100vh - 20px); max-height: calc(100dvh - 20px); overflow: auto; }
+
+/* ============================ PHONES ======================================= */
+@media (max-width: 720px) {
+
+  /* ---- title screen ---- */
+  #screen-title {
+    padding: 14px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .title-card { padding: 28px 20px 20px; border-radius: 20px; width: 100%; }
+  .title-suits { font-size: 1.35rem; letter-spacing: 6px; white-space: nowrap; }
+  .tagline { font-size: 1.1rem; margin-bottom: 14px; }
+  .pitch { font-size: 0.95rem; margin-bottom: 20px; }
+  .title-buttons { flex-direction: column; gap: 12px; }
+  .title-buttons .btn-big { width: 100%; }
+
+  /* ---- game frame ---- */
+  #screen-game {
+    padding: 0 10px;
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+  }
+  #topbar { padding: 8px 0 6px; padding-top: max(8px, env(safe-area-inset-top)); gap: 8px; }
+  .topbar-logo { display: none; }
+  #round-indicator { flex: 1; min-width: 0; font-size: 0.8rem; line-height: 1.25; }
+  #btn-tutorial { flex: 0 0 auto; width: 40px; height: 40px; padding: 0; }
+
+  /* ---- classmates: two compact panels side by side ---- */
+  #zone-opponents { flex-wrap: nowrap; gap: 8px; scroll-margin-top: 64px; }
+  .opponent { flex: 1 1 0; min-width: 0; max-width: none; padding: 6px 8px 8px; border-radius: 12px; }
+  .opp-head { gap: 5px; margin-bottom: 5px; font-size: 0.82rem; }
+  .opp-emoji { font-size: 1rem; }
+  .opp-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .opp-trade-badges { font-size: 0.7rem; white-space: nowrap; }
+  .opp-bank { white-space: nowrap; }
+  .opp-hand { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  .mini-card { width: auto; height: 40px; border-radius: 6px; border-top-width: 3px; gap: 0; }
+  .mini-card .m-icon { font-size: 0.8rem; line-height: 1.1; }
+  .mini-card .m-val { font-size: 0.56rem; }
+  .opp-last { margin-top: 5px; font-size: 0.66rem; }
+
+  /* picking a card to take: the chosen classmate gets the whole row and
+     their cards grow into readable, finger-sized tiles with names */
+  #zone-opponents.taking .opponent:not(.active) { display: none; }
+  #zone-opponents.taking .opp-hand { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  #zone-opponents.taking .mini-card {
+    height: auto; min-height: 62px;
+    display: grid; grid-template-columns: auto 1fr; align-content: start;
+    column-gap: 5px; row-gap: 2px; padding: 5px 6px 6px;
+    justify-items: start; align-items: center;
+  }
+  #zone-opponents.taking .mini-card .m-icon { font-size: 1rem; }
+  #zone-opponents.taking .mini-card .m-val { font-size: 0.82rem; justify-self: end; }
+  #zone-opponents.taking .m-name {
+    display: block; grid-column: 1 / -1;
+    font-size: 0.64rem; font-weight: 700; line-height: 1.2; color: var(--ink);
+  }
+
+  /* ---- board: one swipeable strip, three symptoms in view ---- */
+  #zone-board { padding: 10px 0 2px; align-items: stretch; }
+  .board-label { font-size: 0.76rem; margin-bottom: 5px; text-align: center; }
+  .board-sub { display: none; }
+  .board-label::after { content: "· swipe ↔"; font-weight: 500; opacity: 0.7; margin-left: 4px; }
+  #community-slots {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -10px;
+    padding: 2px 10px 6px;
+    scroll-padding: 0 10px;
+  }
+  #community-slots::-webkit-scrollbar { display: none; }
+  .symptom-card, .community-slot {
+    flex: 0 0 calc((100% - 12px) / 3.12);       /* 3 full cards + a peek of the 4th */
+    width: auto;
+    min-height: 0;
+    scroll-snap-align: start;
+  }
+  .symptom-card { padding: 8px 7px 7px; }
+  .community-slot { min-height: 120px; }
+  .sym-name { font-size: 0.7rem; }
+  .sym-row { margin-top: 5px; padding: 4px 5px; font-size: 0.62rem; line-height: 1.28; }
+  .sym-row b { font-size: 0.54rem; }
+
+  /* ---- live calculator + log ---- */
+  #calculator { align-self: center; gap: 7px; margin-top: 6px; padding: 5px 14px; border-radius: 14px; max-width: 100%; }
+  .calc-chips, .calc-mult { font-size: 1.35rem; }
+  .calc-score { font-size: 1.6rem; }
+  .calc-op { font-size: 1rem; }
+  #calc-note { font-size: 0.66rem; max-width: 118px; line-height: 1.2; }
+  #event-log { margin-top: 6px; min-height: 0; font-size: 0.72rem; line-height: 1.35; }
+  #event-log .log-line:not(.latest) { display: none; }      /* latest event only */
+
+  /* ---- your hand: 3 × 2 grid, every card visible at once ---- */
+  #zone-player { margin-top: 4px; gap: 6px; padding: 4px 0 0; }
+  #player-strip { gap: 10px; font-size: 0.88rem; flex-wrap: wrap; }
+  #player-trades { font-size: 0.74rem; }
+  #hint-bar { padding: 6px 10px; font-size: 0.78rem; line-height: 1.35; }
+  #player-hand {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    min-height: 0;
+    padding-top: 4px;
+    align-items: stretch;
+  }
+  .toolkit-card { width: auto; height: auto; min-height: 104px; padding: 8px 7px 6px; }
+  .toolkit-card.selected,
+  .toolkit-card.selected:hover { transform: translateY(-3px); }
+  .toolkit-card.pickable { outline-offset: 0; }
+  .toolkit-card.dim { opacity: 0.5; }
+  .tk-head { gap: 4px; margin-top: 3px; align-items: flex-start; }
+  .tk-suit { font-size: 0.9rem; line-height: 1.1; }
+  .tk-name { font-size: 0.68rem; }
+  .tk-value { font-size: 1.15rem; margin-top: 4px; margin-bottom: 4px; }
+  .tk-value small { font-size: 0.72rem; }
+  .tk-bonus { font-size: 0.62rem; padding: 3px 5px; }
+  /* play-order badge sits on the value line so it never covers card text */
+  #player-hand .tk-value { position: relative; text-align: left; padding-left: 2px; }
+  #player-hand .tk-order { top: 50%; right: 0; transform: translateY(-50%); width: 22px; height: 22px; }
+  #player-hand .tk-final { font-size: 0.64rem; font-weight: 900; color: var(--ink-soft); text-align: right; margin-top: 3px; }
+
+  /* ---- action buttons: pinned to the bottom, only the ones that matter ---- */
+  #action-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin: 2px -10px 0;
+    padding: 8px 10px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    background: rgba(250, 243, 231, 0.94);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+  }
+  #action-bar .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 46px;
+    padding: 10px 8px;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #action-bar[data-mode="showdown"] .btn:not(#btn-play-hand),
+  #action-bar:not([data-mode="showdown"]) #btn-play-hand,
+  #action-bar[data-mode^="select-"] .btn:disabled { display: none; }
+  #real-help-footer { font-size: 0.68rem; padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); }
+  #action-bar + #real-help-footer { padding-top: 6px; }
+
+  /* ---- modals: nearly full width, buttons always in reach ---- */
+  #modal-overlay { padding: 10px; }
+  #modal-card {
+    width: 100%;
+    padding: 18px 16px 0;
+    border-radius: 16px;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+  #modal-card h2 { font-size: 1.15rem; margin-bottom: 8px; }
+  #modal-card p { font-size: 0.9rem; }
+  .modal-buttons {
+    position: sticky;
+    bottom: 0;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 0 calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(to bottom, rgba(255, 253, 248, 0), var(--card-face) 10px);
+  }
+  .modal-buttons .btn { flex: 1 1 0; min-width: 0; min-height: 46px; padding: 10px 12px; }
+
+  /* trade preview + scoring overlay */
+  .score-wrap { gap: 10px; }
+  .score-cards { max-width: none; min-width: 0; flex: 1 1 100%; flex-wrap: nowrap; gap: 6px; }
+  #sc-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }   /* the 4 played cards */
+  .score-cards .toolkit-card { flex: 1 1 0; width: auto; min-width: 0; min-height: 0; padding: 7px 5px 5px; }
+  .score-cards .tk-name { font-size: 0.6rem; overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+  .score-cards .tk-bonus { font-size: 0.56rem; }
+  .score-cards .tk-final { white-space: normal; }
+  #m-give, #m-take { flex: 0 1 132px; }           /* trade modal: two cards and the arrow on one line */
+  .breakdown { flex: 1 1 100%; min-width: 0; }
+  .bd-line { font-size: 0.8rem; padding: 3px 4px; }
+  .lesson-item { padding: 8px 10px; gap: 10px; }
+  .lesson-text { font-size: 0.82rem; }
+  .results-table th, .results-table td { padding: 7px 6px; font-size: 0.9rem; }
+  .game-stats { gap: 6px; }
+
+  /* tutorial coach card spans the screen */
+  #tutorial-card { width: calc(100vw - 16px); padding: 14px 16px 12px; }
+  #tutorial-text { font-size: 0.88rem; line-height: 1.45; }
+  #tutorial-buttons { margin-top: 10px; }
+  #tutorial-buttons .btn { min-height: 44px; }
+}
+
+/* ---- very narrow phones (iPhone SE 1st gen, small Androids) ------------------ */
+@media (max-width: 350px) {
+  .symptom-card, .community-slot { flex-basis: calc((100% - 6px) / 2.15); }   /* 2 cards + a peek */
+  .tk-name { font-size: 0.64rem; }
+  .tk-bonus { font-size: 0.58rem; }
+  #player-hand .tk-value { font-size: 1.05rem; }
+  #player-hand .tk-value small { font-size: 0.62rem; }
+  #player-hand .tk-order { width: 18px; height: 18px; font-size: 0.66rem; right: -2px; }
+  #sc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #action-bar .btn { font-size: 0.78rem; padding: 10px 5px; }
+  #calc-note { display: none; }
+}
+
+/* ============================ PHONES SIDEWAYS ================================ */
+/* Wide but short: keep the desktop arrangement, just tighten it and pin the
+   action buttons so they are reachable without scrolling.                    */
+@media (min-width: 721px) and (max-height: 520px) {
+  #screen-game {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+  #topbar { padding: 6px 2px 4px; }
+  .opponent { padding: 6px 12px 8px; }
+  .opp-head { margin-bottom: 4px; }
+  .mini-card { height: 46px; }
+  #zone-board { padding: 8px 0 4px; }
+  #community-slots { flex-wrap: nowrap; }
+  .symptom-card, .community-slot { flex: 1 1 0; width: auto; min-width: 0; max-width: 170px; min-height: 0; }
+  #calculator { margin-top: 8px; padding: 4px 20px; }
+  #event-log { min-height: 0; margin-top: 6px; }
+  #event-log .log-line:not(.latest) { display: none; }
+  #player-hand { flex-wrap: nowrap; min-height: 0; padding-top: 12px; gap: 8px; }
+  #player-hand .toolkit-card { flex: 1 1 0; width: auto; min-width: 0; max-width: 130px; height: auto; min-height: 130px; }
+  #action-bar {
+    position: sticky; bottom: 0; z-index: 20;
+    margin: 0 -14px; padding: 6px 14px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(250, 243, 231, 0.94);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+  }
+  #modal-overlay { padding: 8px; }
+  #modal-card { max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); padding: 16px 20px 0; }
+  #sc-cards { max-width: 206px; }                 /* played cards 2 × 2 beside the breakdown */
+  .breakdown { flex: 1 1 240px; min-width: 220px; }
+  .modal-buttons {
+    position: sticky; bottom: 0; margin-top: 10px; padding: 8px 0 12px;
+    background: linear-gradient(to bottom, rgba(255, 253, 248, 0), var(--card-face) 10px);
+  }
+}
