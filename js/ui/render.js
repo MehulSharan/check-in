@@ -79,7 +79,7 @@
 
       if (opts.orderBadge) {
         var badge = el('div', 'tk-order', String(opts.orderBadge));
-        e.appendChild(badge);
+        value.appendChild(badge);   // inside the value row: phones anchor it there
       }
       if (opts.rerollMark) e.classList.add('pickable');
       if (opts.selected) e.classList.add('selected');
@@ -107,6 +107,9 @@
       if (card.def.type === 'selfcare') { val.classList.add('chips'); val.textContent = '+' + card.def.chips; }
       else { val.classList.add('mult'); val.textContent = '+' + card.def.mult + '×'; }
       e.appendChild(val);
+      // card name: hidden by default, shown on phones while picking a card to take
+      e.appendChild(el('span', 'm-name', card.def.name));
+      e.title = card.def.name;
       if (opts.dim) e.classList.add('dim');
       if (opts.clickable) {
         e.classList.add('clickable');
@@ -141,6 +144,8 @@
     opponents: function (game, ui) {
       var zone = document.getElementById('zone-opponents');
       clear(zone);
+      // phones: while choosing a card to take, the target classmate gets the full row
+      zone.classList.toggle('taking', ui.mode === 'select-take');
       game.players.forEach(function (p, i) {
         if (i === 0) return; // human is the bottom zone
         var panel = el('div', 'opponent');
@@ -184,6 +189,10 @@
     board: function (game, flipLast) {
       var slots = document.getElementById('community-slots');
       clear(slots);
+      if (slots.dataset.round !== String(game.round)) {   // new round: strip back to the flop
+        slots.dataset.round = String(game.round);
+        slots.scrollLeft = 0;
+      }
       for (var i = 0; i < CheckIn.CONFIG.COMMUNITY_PER_ROUND; i++) {
         var sym = game.community[i];
         if (sym) {
@@ -192,6 +201,17 @@
           var placeholder = ['Flop 1', 'Flop 2', 'Flop 3', 'Turn', 'River'][i] || '';
           var slot = el('div', 'community-slot', i < 3 ? placeholder : placeholder);
           slots.appendChild(slot);
+        }
+      }
+      // phones show the board as a swipeable strip: bring a freshly dealt
+      // card into view so the turn and river are never dealt off-screen
+      if (flipLast && slots.scrollWidth > slots.clientWidth + 4) {
+        var fresh = slots.children[game.community.length - 1];
+        if (fresh) {
+          var left = slots.scrollLeft + 12 +
+            fresh.getBoundingClientRect().right - slots.getBoundingClientRect().right;
+          if (slots.scrollTo) slots.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+          else slots.scrollLeft = Math.max(0, left);
         }
       }
     },

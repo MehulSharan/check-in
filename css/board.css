@@ -1,11 +1,12 @@
 /* Check In — css/board.css
    The three game zones: opponents (top), community board + calculator
-   (middle), player area (bottom). Desktop-first; wraps gracefully. */
+   (middle), player area (bottom). Desktop-first; the phone layout is in css/mobile.css. */
 
 #screen-game {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   max-width: 1180px;
   margin: 0 auto;
   padding: 0 18px 14px;
@@ -208,10 +209,4 @@
 }
 .stat-chip b { color: var(--ink); }
 
-@media (max-width: 720px) {
-  .toolkit-card { width: 92px; height: 132px; }
-  .tk-value { font-size: 1.15rem; }
-  .symptom-card, .community-slot { width: 108px; min-height: 148px; }
-  .sym-row { font-size: 0.53rem; }
-  .opponent { min-width: 100%; }
-}
+/* Phone layout lives in css/mobile.css (loaded last). */

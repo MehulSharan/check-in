@@ -20,6 +20,10 @@ Double-click **`index.html`**. That's it — no build step, no server, no
 dependencies (the game deliberately uses classic `<script>` tags instead of ES
 modules so it runs straight from `file://`).
 
+Works on phones too: the layout switches to a touch-friendly one below 720px
+(`css/mobile.css`) — swipe the symptom strip, tap cards, buttons stay pinned
+to the bottom of the screen.
+
 To host it: push to GitHub and enable GitHub Pages (see
 **[PUSH_TO_GITHUB.md](PUSH_TO_GITHUB.md)**, ~3 commands).
 
