@@ -2,7 +2,7 @@
  * Check In — js/ui/animations.js
  * ------------------------------------------------------------------
  * Small timing/animation helpers: sleeps, staggered deals, number
- * count-ups (Balatro-style), floating badges.
+ * count-ups, floating badges.
  */
 (function (root) {
   'use strict';

@@ -40,7 +40,7 @@
 /* deal: cards fly in from the top */
 .anim-deal { animation: dealIn 0.38s cubic-bezier(0.25, 1.2, 0.5, 1) both; }
 
-/* community card flip */
+/* symptom card flip */
 .anim-flip { animation: flipIn 0.42s ease both; }
 
 /* number tick pulse (calculator + bank) */

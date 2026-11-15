@@ -19,7 +19,7 @@
  *   cards that appear in the bot's best 4-of-6 (Scoring.bestPlay) and
  *   order the leftovers by standalone value.
  *
- * Showdown: no heuristics — the bot enumerates every 4-of-6 combination
+ * Reveal: no heuristics — the bot enumerates every 4-of-6 combination
  * (and every "first card" when Doomscrolling is on the board) and plays
  * the mathematically best hand. See Scoring.bestPlay.
  */
@@ -30,7 +30,7 @@
 
   function standaloneValue(game, card) {
     return CheckIn.Scoring.scoreHand({
-      played: [card], board: game.community, trades: 0,
+      played: [card], board: game.shared, trades: 0,
     }).score;
   }
 
@@ -38,7 +38,7 @@
    * 4-of-6, ordered by standalone value (weakest first). */
   function spareCards(game, idx) {
     var p = game.players[idx];
-    var best = CheckIn.Scoring.bestPlay(p.hand, game.community, p.tradesThisRound);
+    var best = CheckIn.Scoring.bestPlay(p.hand, game.shared, p.tradesThisRound);
     var keep = {};
     best.cards.forEach(function (c) { keep[c.uid] = true; });
     var spares = p.hand.filter(function (c) { return !keep[c.uid]; });

@@ -1,8 +1,9 @@
-# 🃏 Check In — a coping card game
+# 💛 Check In — a coping card game
 
-A Texas Hold'em-inspired card game with **no gambling**: chips are pure score,
-every card is face-up, and the winning strategy is pairing self-care with
-help-seeking. Built as the playable digital prototype for the **TLIG Board Game
+A pattern-recognition coping card game: points are pure score, every card is
+face-up, and the winning strategy is reading the shared symptoms and matching
+them with the right mix of self-care and help-seeking. Built as the playable
+digital prototype for the **TLIG Board Game
 2026** competition (Mental Health Toolkit 2.0, University of Nottingham
 Malaysia) — the brief calls for a physical game; this demo validates the rules
 and lives in the proposal as a playable link. One card database
@@ -31,15 +32,15 @@ To host it: push to GitHub and enable GitHub Pages (see
 
 | | |
 |---|---|
-| **The board** | 5 shared **Symptom cards** deal like a poker board (flop 3 → turn 1 → river 1). Each one *debuffs* some plays and *rewards* the coping strategies that actually fit it. |
-| **Your toolkit** | 6 face-up cards. **Self-Care** cards bank **Chips** (🟦). **Help-Seeking** cards add **Multipliers** (🟥). |
-| **The score** | `Chips × Mult` — Balatro math, not poker hands. Self-care alone caps your recovery; reaching out multiplies it. |
+| **The board** | 5 shared **Symptom cards** are revealed over the round (3 first, then 1, then 1). Each one *debuffs* some plays and *rewards* the coping strategies that actually fit it — the game is **pattern recognition**: read the symptoms, match your toolkit. |
+| **Your toolkit** | 6 face-up cards. **Self-Care** cards bank **points** (🟦). **Help-Seeking** cards add **Multipliers** (🟥). |
+| **The score** | `points × Mult`. Self-care alone caps your recovery; reaching out multiplies it. |
 | **The twist** | Trading a card with a classmate gives **both players +2 Mult**. In this game, helping someone literally multiplies your own score. |
 
 ## 📜 Full rules
 
-**Game shape:** 3 rounds; each round is deal → action → turn → action →
-river → showdown. Highest chip bank after round 3 wins. Ties share the rank.
+**Game shape:** 3 rounds; each round is deal → action → new symptom → action →
+final symptom → reveal. Highest score bank after round 3 wins. Ties share the rank.
 
 **Each action phase (one action per player):**
 - 🔄 **Reroll** — discard & redraw up to 2 cards
@@ -48,26 +49,26 @@ river → showdown. Highest chip bank after round 3 wins. Ties share the rank.
   **accepting an incoming trade is free** — accepting help never costs you.
 - ⏭️ **Keep Hand** — pass
 
-**Showdown:** pick 4 of your 6 cards (order matters — see S08 below) and
-play them. Score = `Total Chips × Total Mult`, banked instantly.
+**Reveal:** pick 4 of your 6 cards (order matters — see S08 below) and
+play them. Score = `Total points × Total Mult`, banked instantly.
 
 **Scoring order of operations** (`js/engine/scoring.js`):
-1. Base values load (Self-Care → chips, Help-Seeking → mult)
+1. Base values load (Self-Care → points, Help-Seeking → mult)
 2. Board **debuffs** apply (unless suppressed by T20/T22)
 3. Each played card's own **conditional bonus** applies
 4. Board **recognition bonuses** apply
 5. Trade bonus (+2 per trade, max 2 stacks)
-6. Aggregate: chips cap → floor 0; mult lock → floor 1
-7. `Score = Chips × Mult`
+6. Aggregate: points cap → floor 0; mult lock → floor 1
+7. `Score = points × Mult`
 
 ### The decks
 
-- **Community deck — 10 Symptom cards** (S01–S10), 5 dealt per round, never
+- **Shared deck — 10 Symptom cards** (S01–S10), 5 dealt per round, never
   duplicated within a round. Every card carries a Symptom Effect (debuff), a
   Recognition Bonus (reward for matching the right strategy), and a
-  mental-health lesson shown after the showdown.
+  mental-health lesson shown after the reveal.
 - **Toolkit deck — 24 unique cards × 2 copies = 48** (T01–T24): 14 Self-Care
-  (+Chips) across BODY/MIND/SOCIAL/ACADEMIC, and 10 Help-Seeking (+Mult)
+  (+points) across BODY/MIND/SOCIAL/ACADEMIC, and 10 Help-Seeking (+Mult)
   including the WILD-suit UNM campus services (Wellbeing Office, Counselling,
   Personal Tutor, Welfare Helpline, Health Centre).
 
@@ -89,11 +90,11 @@ Ambiguities in the original spec, resolved here so the dev, the rules sheet
 and the code never disagree:
 
 1. Hands are fresh each round (6 new cards); old hands go to the discard pile.
-2. The community deck reshuffles all 10 symptoms every round.
+2. The shared symptom deck reshuffles all 10 symptoms every round.
 3. The toolkit draw pile reshuffles discards when exhausted.
 4. **S08 Doomscrolling**: "first card played" = first in your *selection
    order* (badge ① in the UI). Bots sacrifice their cheapest card first.
-5. **S05 Imposter Syndrome**: the 15-chip cap applies only when *zero*
+5. **S05 Imposter Syndrome**: the 15-point cap applies only when *zero*
    help-seeking cards are played; any help card grants +10 and lifts the cap.
 6. **S06**'s +3 Mult stacks with the standard trade bonus.
 7. **WILD** counts as exactly *one* suit per card, chosen to maximize your
@@ -101,19 +102,19 @@ and the code never disagree:
    Professional-help recognition (S09) checks the card's *defined* suit, so
    it fires regardless of assignment.
 8. Ties share a rank; no tiebreaker in the MVP.
-9. Debuffs modify a card's **base** chips, but **S01 zeroes an ACADEMIC
+9. Debuffs modify a card's **base** points, but **S01 zeroes an ACADEMIC
    card's entire contribution** (base + bonus) — the harshest reading of
-   "give 0 Chips".
+   "give 0 points".
 10. **T24 Health Centre**: "+4 Mult with a BODY card" means *another* BODY
     card (its own suit doesn't self-satisfy — otherwise the "+2 otherwise"
     branch would be dead text).
 11. **T20 Personal Tutor**: "ignores ACADEMIC debuffs" = debuffs from
     ACADEMIC-*category symptoms* (S01 Burnout, S05 Imposter). S06 (SOCIAL
     category) and S04 (BODY) still apply.
-12. **T22 Counselling**: clears **chip-type** debuffs only (S01, S02, S04,
+12. **T22 Counselling**: clears **point-type** debuffs only (S01, S02, S04,
     S06, S08, S09); mult debuffs (S03, S07) still apply, per its own wording.
 13. Receiving a trade is free (no action spent); only initiating costs one.
-14. Chips floor at 0 and mult floors at 1× after everything.
+14. points floor at 0 and mult floors at 1× after everything.
 
 Balance decisions and the data behind them: **[BALANCE_CHANGELOG.md](BALANCE_CHANGELOG.md)**.
 
@@ -127,7 +128,7 @@ js/config.js        tunable constants (bot names, trade chance, round count…)
 js/data/cards.js    ★ the card database — all stats + effect hooks
 js/engine/scoring.js  scoring pipeline (pure, deterministic)
 js/engine/deck.js     decks, shuffling, unique card instances
-js/engine/round.js    1-round state machine (deal → actions → showdown)
+js/engine/round.js    1-round state machine (deal → actions → reveal)
 js/ai/bots.js         simple, documented bot heuristics
 js/ui/render.js       DOM painters (no logic)
 js/ui/animations.js   deal/flip/count-up/float-badge helpers
@@ -158,7 +159,7 @@ via an `unhandledrejection` listener.
 
 ### Roadmap ideas (deliberately out of MVP scope)
 
-- sound design (WebAudio chimes for chips/mult ticks)
+- sound design (WebAudio chimes for points/mult ticks)
 - mobile-first layout pass
 - pass-and-play for 2–4 humans; online multiplayer
 - more symptoms/toolkit cards (the hook system scales)

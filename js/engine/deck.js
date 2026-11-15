@@ -10,7 +10,7 @@
  *                  draw() auto-reshuffles the discard pile when empty;
  *                  call discard(cards) when cards leave play (rerolls,
  *                  hands collected at the end of a round).
- *   CommunityDeck— 10 symptom cards, freshly shuffled every round
+ *   SymptomDeck— 10 symptom cards, freshly shuffled every round
  *                  (5 of 10 appear per round, never duplicated).
  */
 (function (root) {
@@ -54,10 +54,10 @@
   ToolkitDeck.prototype.remaining = function () { return this.drawPile.length; };
   ToolkitDeck.prototype.peekAll = function () { return this.drawPile.concat(this.discardPile); };
 
-  function CommunityDeck() {
+  function SymptomDeck() {
     this.pile = shuffle(CheckIn.SYMPTOM_CARDS.map(makeInstance));
   }
-  CommunityDeck.prototype.draw = function () { return this.pile.pop() || null; };
+  SymptomDeck.prototype.draw = function () { return this.pile.pop() || null; };
 
-  CheckIn.Deck = { ToolkitDeck: ToolkitDeck, CommunityDeck: CommunityDeck, _makeInstance: makeInstance };
+  CheckIn.Deck = { ToolkitDeck: ToolkitDeck, SymptomDeck: SymptomDeck, _makeInstance: makeInstance };
 })(typeof self !== 'undefined' ? self : globalThis);

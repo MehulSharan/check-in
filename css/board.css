@@ -1,5 +1,5 @@
 /* Check In — css/board.css
-   The three game zones: opponents (top), community board + calculator
+   The three game zones: opponents (top), shared board + calculator
    (middle), player area (bottom). Desktop-first; the phone layout is in css/mobile.css. */
 
 #screen-game {
@@ -54,7 +54,7 @@
 .opp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .opp-emoji { font-size: 1.3rem; }
 .opp-name { font-weight: 800; }
-.opp-bank { margin-left: auto; font-weight: 900; color: var(--chip-blue); }
+.opp-bank { margin-left: auto; font-weight: 900; color: var(--point-blue); }
 .opp-trade-badges { font-size: 0.8rem; }
 .opp-hand { display: flex; gap: 6px; flex-wrap: wrap; }
 .opp-last { margin-top: 8px; font-size: 0.78rem; color: var(--ink-soft); font-weight: 700; }
@@ -69,7 +69,7 @@
 }
 .board-label { font-weight: 800; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 8px; }
 .board-sub { font-weight: 500; opacity: 0.75; }
-#community-slots {
+#symptom-slots {
   display: flex;
   gap: 10px;
   justify-content: center;
@@ -88,8 +88,8 @@
   padding: 10px 26px;
   box-shadow: var(--shadow);
 }
-.calc-chips, .calc-mult, .calc-score { font-weight: 900; font-variant-numeric: tabular-nums; }
-.calc-chips { color: var(--chip-blue); font-size: 1.9rem; }
+.calc-points, .calc-mult, .calc-score { font-weight: 900; font-variant-numeric: tabular-nums; }
+.calc-points { color: var(--point-blue); font-size: 1.9rem; }
 .calc-mult { color: var(--mult-red); font-size: 1.9rem; }
 .calc-score { color: var(--ink); font-size: 2.2rem; }
 .calc-op { color: var(--ink-soft); font-size: 1.3rem; font-weight: 700; }
@@ -117,7 +117,7 @@
 }
 #player-strip { display: flex; align-items: center; gap: 14px; }
 #player-avatar { font-weight: 900; }
-#player-bank { font-weight: 900; color: var(--chip-blue); }
+#player-bank { font-weight: 900; color: var(--point-blue); }
 #player-trades { font-size: 0.85rem; }
 
 #hint-bar {
@@ -172,7 +172,7 @@
 }
 .bd-line .bd-label { color: var(--ink); }
 .bd-line .bd-delta { font-weight: 900; white-space: nowrap; }
-.bd-line .d-chips { color: var(--chip-blue); }
+.bd-line .d-points { color: var(--point-blue); }
 .bd-line .d-mult { color: var(--mult-red); }
 .bd-line.kind-zero .bd-label, .bd-line.kind-cap .bd-label, .bd-line.kind-lock .bd-label { color: var(--bad); }
 .bd-line.kind-suppressed { color: var(--good); font-weight: 700; }
@@ -196,10 +196,10 @@
 .results-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
 .results-table th, .results-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
 .results-table th { color: var(--ink-soft); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.results-table td.num { font-weight: 900; color: var(--chip-blue); font-variant-numeric: tabular-nums; }
+.results-table td.num { font-weight: 900; color: var(--point-blue); font-variant-numeric: tabular-nums; }
 .podium-medal { font-size: 2rem; margin-bottom: 4px; }
 .game-stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
-.stat-chip {
+.stat-pill {
   background: var(--cream);
   border-radius: 999px;
   padding: 7px 14px;
@@ -207,6 +207,6 @@
   font-weight: 700;
   color: var(--ink-soft);
 }
-.stat-chip b { color: var(--ink); }
+.stat-pill b { color: var(--ink); }
 
 /* Phone layout lives in css/mobile.css (loaded last). */

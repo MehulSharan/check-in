@@ -21,15 +21,15 @@
     // Game shape -----------------------------------------------------------
     ROUNDS_PER_GAME: 3,
     HAND_SIZE: 6,            // toolkit cards dealt face-up each round
-    PLAYED_SIZE: 4,          // cards selected at the Showdown
-    COMMUNITY_PER_ROUND: 5,  // flop 3 + turn 1 + river 1
-    FLOP: 3, TURN: 1, RIVER: 1,
+    PLAYED_SIZE: 4,          // cards selected at the Reveal
+    SHARED_PER_ROUND: 5,  // 3 symptoms + 1 + 1
+    OPENING: 3, MID: 1, FINAL: 1,
     TOOLKIT_COPIES: 2,       // each unique toolkit card appears this many times
 
     // Scoring --------------------------------------------------------------
-    BASE_CHIPS: 0,
+    BASE_POINTS: 0,
     BASE_MULT: 1,
-    MIN_CHIPS: 0,
+    MIN_POINTS: 0,
     MIN_MULT: 1,
 
     // Peer Support Trading ---------------------------------------------------

@@ -11,7 +11,7 @@
  *   - strategy mix                  → does the game reward mixing self-care
  *                                     with help-seeking? (the core lesson)
  *   - trade uptake                  → is the trade mechanic actually used?
- *   - symptom impact                → which community cards swing scores
+ *   - symptom impact                → which shared symptom cards swing scores
  *                                     hardest (delta vs not-on-board)?
  *   - card contributions            → which toolkit cards over/under-perform?
  *
@@ -37,12 +37,12 @@ var roundScores = [[], [], []];            // scores by round index
 var handStats = { hands: 0, helpCards: 0, selfCareCards: 0, handsWithHelp: 0, handsAllHelp: 0, handsAllSelfCare: 0 };
 var tradeStats = { games: 0, trades: 0, playersTrading: 0, playerSlots: 0 };
 var symptomStats = {};                     // id -> { present: [], absent: [] }
-var cardStats = {};                        // id -> { plays, chips, mult, handScores }
+var cardStats = {};                        // id -> { plays, points, mult, handScores }
 var winnerBanks = [];
 
 CheckIn.SYMPTOM_CARDS.forEach(function (s) { symptomStats[s.id] = { present: [], absent: [], name: s.name }; });
 CheckIn.TOOLKIT_CARDS.forEach(function (c) {
-  cardStats[c.id] = { plays: 0, chips: 0, mult: 0, handScores: [], name: c.name };
+  cardStats[c.id] = { plays: 0, points: 0, mult: 0, handScores: [], name: c.name };
 });
 
 function percentile(sortedArr, p) {
@@ -73,7 +73,7 @@ for (var g = 0; g < GAMES; g++) {
     game.startRound();
     game.players.forEach(function (_, i) { game.botAct(i); });  // ACTION_1
     game.players.forEach(function (_, i) { game.botAct(i); });  // ACTION_2
-    var boardIds = game.community.map(function (c) { return c.def.id; });
+    var boardIds = game.shared.map(function (c) { return c.def.id; });
     game.players.forEach(function (_, i) { game.botPlayHand(i); });
 
     game.players.forEach(function (p) {
@@ -83,7 +83,7 @@ for (var g = 0; g < GAMES; g++) {
       var help = 0, self = 0;
       r.cardScores.forEach(function (cs) {
         var st = cardStats[cs.defId];
-        st.plays += 1; st.chips += cs.chips; st.mult += cs.mult; st.handScores.push(r.score);
+        st.plays += 1; st.points += cs.points; st.mult += cs.mult; st.handScores.push(r.score);
         if (CheckIn.cardById(cs.defId).type === 'helpseeking') help += 1; else self += 1;
       });
       handStats.helpCards += help;
@@ -147,13 +147,13 @@ process.stdout.write('\n■ Toolkit cards (sorted by avg hand score when played)
 var cardRows = CheckIn.TOOLKIT_CARDS.map(function (c) {
   var st = cardStats[c.id];
   return { id: c.id, name: st.name, plays: st.plays,
-    chips: st.plays ? st.chips / st.plays : 0, mult: st.plays ? st.mult / st.plays : 0,
+    points: st.plays ? st.points / st.plays : 0, mult: st.plays ? st.mult / st.plays : 0,
     hand: avg(st.handScores) };
 }).sort(function (a, b) { return a.hand - b.hand; });
 cardRows.forEach(function (r) {
   process.stdout.write('  ' + r.id + ' ' + (r.name + ' '.repeat(38)).slice(0, 38) +
     'plays ' + (r.plays + ''.padEnd(5)).slice(0, 5) +
-    'chips ' + (fmt(r.chips) + '    ').slice(0, 7) +
+    'points ' + (fmt(r.points) + '    ').slice(0, 7) +
     'mult ' + (fmt(r.mult) + '    ').slice(0, 6) +
     'hand ' + fmt(r.hand) + '\n');
 });

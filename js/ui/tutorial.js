@@ -14,8 +14,8 @@
     {
       target: '#zone-board',
       title: '1 · The shared board',
-      html: 'These five slots fill up like a poker board — <b>flop (3) → turn (1) → river (1)</b> — ' +
-        'with shared <b>Symptom cards</b>.<br><br>' +
+      html: 'These five slots fill with shared <b>Symptom cards</b> — ' +
+        '<b>3 at first, then 1, then 1</b> as the round goes on.<br><br>' +
         'Each symptom <span style="color:#c24545">debuffs</span> some plays and ' +
         '<span style="color:#3f9d6b">rewards</span> the coping strategies that actually fit it. ' +
         '<b>Read the board before you act.</b>',
@@ -23,10 +23,10 @@
     {
       target: '#player-hand',
       title: '2 · Your toolkit (face-up!)',
-      html: 'No hidden cards, no betting. Your 6 toolkit cards are open information:<br><br>' +
-        '<b style="color:#2f6db8">Self-Care</b> cards bank <b>Chips</b>. ' +
+      html: 'No hidden cards, nothing at stake. Your 6 toolkit cards are open information:<br><br>' +
+        '<b style="color:#2f6db8">Self-Care</b> cards bank <b>points</b>. ' +
         '<b style="color:#c24545">Help-Seeking</b> cards add <b>Multipliers</b>.<br><br>' +
-        'Score = Chips × Mult — you need <b>both</b>. Self-care alone caps your recovery; ' +
+        'Score = points × Mult — you need <b>both</b>. Self-care alone caps your recovery; ' +
         'reaching out multiplies it.',
     },
     {
@@ -37,7 +37,7 @@
         '🤝 <b>Offer Trade</b> — swap a card with a classmate. <b>Both of you get +2 Mult</b> — ' +
         'helping pays, literally.<br>' +
         '⏭️ <b>Keep Hand</b> — pass.<br><br>' +
-        'After the river, <b>pick 4 of your 6 cards</b> and Play Hand. Watch the live calculator. ' +
+        'After the final symptom, <b>pick 4 of your 6 cards</b> and Play Hand. Watch the live calculator. ' +
         'Highest bank after 3 rounds wins!',
     },
   ];

@@ -3,8 +3,8 @@
  * ------------------------------------------------------------------
  * The 1-round state machine (3 rounds = 1 full game). Pure logic, no DOM.
  *
- *   IDLE ──startRound()──▶ ACTION_1 ──(all players acted)──▶ [deal Turn]
- *        ──▶ ACTION_2 ──(all players acted)──▶ [deal River] ──▶ SHOWDOWN
+ *   IDLE ──startRound()──▶ ACTION_1 ──(all players acted)──▶ [reveal 4th symptom]
+ *        ──▶ ACTION_2 ──(all players acted)──▶ [reveal 5th symptom] ──▶ REVEAL
  *        ──(all hands played)──▶ SCORING ──finishRound()──▶ ROUND_END
  *                                    │
  *                                    └─ after round 3 ──▶ GAME_OVER
@@ -25,7 +25,7 @@
  *                               { pendingOffer: {...} } for the UI to show
  *                               (accept → doTrade, decline → resolveBotOffer
  *                               makes the bot reroll instead).
- *   botPlayHand(idx)            plays the bot's best 4-of-6 at Showdown.
+ *   botPlayHand(idx)            plays the bot's best 4-of-6 at Reveal.
  *   playFullGameBotVsBot()      headless full game (used by tools/sim.js).
  */
 (function (root) {
@@ -44,9 +44,9 @@
     });
     this.round = 0;              // completed rounds
     this.state = 'IDLE';
-    this.community = [];
+    this.shared = [];
     this.toolkitDeck = new CheckIn.Deck.ToolkitDeck();
-    this.communityDeck = null;
+    this.symptomDeck = null;
     this.isOver = false;
     this.stats = { trades: 0, rerolls: 0, helpCardsPlayed: 0, selfCarePlayed: 0 };
     this.eventLog = [];
@@ -74,13 +74,13 @@
       p.tradesThisRound = 0; p.actedThisPhase = false; p.hasPlayed = false;
       p.playedCards = null; p.lastResult = null;
     });
-    this.communityDeck = new CheckIn.Deck.CommunityDeck();
-    this.community = [];
+    this.symptomDeck = new CheckIn.Deck.SymptomDeck();
+    this.shared = [];
     this.players.forEach(function (p) { p.hand = g._drawToolkit(CONFIG.HAND_SIZE); });
-    for (var i = 0; i < CONFIG.FLOP; i++) this.community.push(this.communityDeck.draw());
+    for (var i = 0; i < CONFIG.OPENING; i++) this.shared.push(this.symptomDeck.draw());
     this.state = 'ACTION_1';
-    this.log('🃏 Round ' + (this.round + 1) + ' — the flop shows ' +
-      this.community.map(function (c) { return c.def.name; }).join(', '));
+    this.log('💛 Round ' + (this.round + 1) + ' — the opening symptoms: ' +
+      this.shared.map(function (c) { return c.def.name; }).join(', '));
   };
 
   Game.prototype._inActionPhase = function () {
@@ -92,15 +92,15 @@
     var g = this;
     if (!g.players.every(function (p) { return p.actedThisPhase; })) return;
     if (g.state === 'ACTION_1') {
-      g.community.push(g.communityDeck.draw());           // the Turn
+      g.shared.push(g.symptomDeck.draw());           // the Turn
       g.players.forEach(function (p) { p.actedThisPhase = false; });
       g.state = 'ACTION_2';
-      g.log('🔄 Turn dealt: ' + g.community[g.community.length - 1].def.name);
+      g.log('🔄 Fourth symptom revealed: ' + g.shared[g.shared.length - 1].def.name);
     } else if (g.state === 'ACTION_2') {
-      g.community.push(g.communityDeck.draw());           // the River
+      g.shared.push(g.symptomDeck.draw());           // the 5th symptom
       g.players.forEach(function (p) { p.actedThisPhase = false; });
-      g.state = 'SHOWDOWN';
-      g.log('🌊 River dealt: ' + g.community[g.community.length - 1].def.name + ' — Showdown!');
+      g.state = 'REVEAL';
+      g.log('🌊 Fifth symptom revealed: ' + g.shared[g.shared.length - 1].def.name + ' — Reveal!');
     }
   };
 
@@ -182,11 +182,11 @@
     }
   };
 
-  /* ---- showdown -------------------------------------------------------- */
+  /* ---- reveal -------------------------------------------------------- */
 
   Game.prototype.playHand = function (idx, orderedUids) {
     var p = this.players[idx];
-    if (this.state !== 'SHOWDOWN') throw new Error('playHand only at the Showdown');
+    if (this.state !== 'REVEAL') throw new Error('playHand only at the Reveal');
     if (p.hasPlayed) throw new Error(p.name + ' already played');
     var n = Math.min(CONFIG.PLAYED_SIZE, p.hand.length);
     if (orderedUids.length !== n) throw new Error('play exactly ' + n + ' cards');
@@ -197,7 +197,7 @@
       return byUid[uid];
     });
     var result = CheckIn.Scoring.scoreHand({
-      played: ordered, board: this.community, trades: p.tradesThisRound,
+      played: ordered, board: this.shared, trades: p.tradesThisRound,
     });
     p.bank += result.score;
     p.playedCards = ordered;
@@ -208,14 +208,14 @@
       if (c.def.type === 'helpseeking') self.stats.helpCardsPlayed += 1;
       else self.stats.selfCarePlayed += 1;
     });
-    this.log('▶️ ' + p.name + ' plays a hand worth ' + result.score + ' (' + result.chips + ' × ' + result.mult + ')');
+    this.log('▶️ ' + p.name + ' plays a hand worth ' + result.score + ' (' + result.points + ' × ' + result.mult + ')');
     if (this.players.every(function (q) { return q.hasPlayed; })) this.state = 'SCORING';
     return result;
   };
 
   Game.prototype.botPlayHand = function (idx) {
     var p = this.players[idx];
-    var best = CheckIn.Scoring.bestPlay(p.hand, this.community, p.tradesThisRound);
+    var best = CheckIn.Scoring.bestPlay(p.hand, this.shared, p.tradesThisRound);
     return this.playHand(idx, best.cards.map(function (c) { return c.uid; }));
   };
 
@@ -245,7 +245,7 @@
     while (!g.isOver) {
       g.startRound();
       g.players.forEach(function (_, i) { g.botAct(i); });   // ACTION_1 → Turn
-      g.players.forEach(function (_, i) { g.botAct(i); });   // ACTION_2 → River
+      g.players.forEach(function (_, i) { g.botAct(i); });   // ACTION_2 → 5th symptom
       g.players.forEach(function (_, i) { g.botPlayHand(i); });
       g.finishRound();
     }

@@ -56,7 +56,7 @@
   line-height: 1;
   text-align: center;
 }
-.tk-value.chips { color: var(--chip-blue); }
+.tk-value.points { color: var(--point-blue); }
 .tk-value.mult { color: var(--mult-red); }
 .tk-value small { font-size: 0.85rem; font-weight: 800; }
 
@@ -71,7 +71,7 @@
 }
 .tk-bonus:empty { display: none; }
 
-/* selection order badge (showdown) */
+/* selection order badge (reveal) */
 .tk-order {
   position: absolute;
   top: 8px; right: 7px;
@@ -87,7 +87,7 @@
   box-shadow: var(--shadow);
 }
 
-/* ---- symptom card (community board) -------------------------------------- */
+/* ---- symptom card (shared board) -------------------------------------- */
 .symptom-card {
   width: 138px;
   min-height: 168px;
@@ -124,8 +124,8 @@
 .sym-bonus { background: #e8f4ec; color: #2c6e49; }
 .sym-row b { font-size: 0.58rem; letter-spacing: 0.4px; text-transform: uppercase; display: block; opacity: 0.75; }
 
-/* empty community slot */
-.community-slot {
+/* empty symptom slot */
+.shared-slot {
   width: 138px;
   min-height: 168px;
   border-radius: var(--radius);
@@ -156,7 +156,7 @@
 }
 .mini-card .m-icon { font-size: 0.95rem; }
 .mini-card .m-val { font-size: 0.62rem; font-weight: 900; }
-.mini-card .m-val.chips { color: var(--chip-blue); }
+.mini-card .m-val.points { color: var(--point-blue); }
 .mini-card .m-val.mult { color: var(--mult-red); }
 .mini-card.clickable { cursor: pointer; }
 @media (hover: hover) {

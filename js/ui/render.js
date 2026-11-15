@@ -7,9 +7,9 @@
  *
  * UI state shape (owned by main.js):
  *   ui.mode          'idle' | 'select-reroll' | 'select-give' |
- *                    'select-target' | 'select-take' | 'showdown'
+ *                    'select-target' | 'select-take' | 'reveal'
  *   ui.rerollSel     [uid] cards marked for reroll
- *   ui.showdownSel   [uid] ordered selection at showdown
+ *   ui.revealSel   [uid] ordered selection at reveal
  *   ui.tradeGive     uid of the card the human is offering
  *   ui.tradeTarget   player index the human is trading with
  *   ui.phaseText     human-readable phase label
@@ -63,9 +63,9 @@
 
       var value = el('div', 'tk-value');
       if (card.def.type === 'selfcare') {
-        value.classList.add('chips');
-        value.textContent = '+' + card.def.chips;
-        var sub = el('small', null, ' chips');
+        value.classList.add('points');
+        value.textContent = '+' + card.def.points;
+        var sub = el('small', null, ' points');
         value.appendChild(sub);
       } else {
         value.classList.add('mult');
@@ -84,11 +84,11 @@
       if (opts.rerollMark) e.classList.add('pickable');
       if (opts.selected) e.classList.add('selected');
       if (opts.dim) e.classList.add('dim');
-      if (opts.finalChips != null) {
+      if (opts.finalPoints != null) {
         var fin = el('div', 'tk-final');
-        fin.textContent = (opts.finalChips ? '+' + opts.finalChips + ' chips' : '') +
+        fin.textContent = (opts.finalPoints ? '+' + opts.finalPoints + ' points' : '') +
           (opts.finalMult ? ' +' + opts.finalMult + '×' : '');
-        if (!fin.textContent) fin.textContent = '0 chips';
+        if (!fin.textContent) fin.textContent = '0 points';
         e.appendChild(fin);
       }
       if (opts.onclick) {
@@ -104,7 +104,7 @@
       e.dataset.uid = card.uid;
       e.appendChild(el('span', 'm-icon', card.def.icon));
       var val = el('span', 'm-val');
-      if (card.def.type === 'selfcare') { val.classList.add('chips'); val.textContent = '+' + card.def.chips; }
+      if (card.def.type === 'selfcare') { val.classList.add('points'); val.textContent = '+' + card.def.points; }
       else { val.classList.add('mult'); val.textContent = '+' + card.def.mult + '×'; }
       e.appendChild(val);
       // card name: hidden by default, shown on phones while picking a card to take
@@ -175,8 +175,8 @@
 
         if (p.lastResult) {
           panel.appendChild(el('div', 'opp-last',
-            'played ' + p.lastResult.chips + ' × ' + p.lastResult.mult + ' = ' +
-            p.lastResult.score + ' chips'));
+            'played ' + p.lastResult.points + ' × ' + p.lastResult.mult + ' = ' +
+            p.lastResult.score + ' points'));
         }
         if (ui.mode === 'select-target') {
           panel.style.cursor = 'pointer';
@@ -187,26 +187,26 @@
     },
 
     board: function (game, flipLast) {
-      var slots = document.getElementById('community-slots');
+      var slots = document.getElementById('symptom-slots');
       clear(slots);
-      if (slots.dataset.round !== String(game.round)) {   // new round: strip back to the flop
+      if (slots.dataset.round !== String(game.round)) {   // new round: strip back to the opening symptoms
         slots.dataset.round = String(game.round);
         slots.scrollLeft = 0;
       }
-      for (var i = 0; i < CheckIn.CONFIG.COMMUNITY_PER_ROUND; i++) {
-        var sym = game.community[i];
+      for (var i = 0; i < CheckIn.CONFIG.SHARED_PER_ROUND; i++) {
+        var sym = game.shared[i];
         if (sym) {
-          slots.appendChild(Render.symptomCard(sym, { flip: flipLast && i === game.community.length - 1 }));
+          slots.appendChild(Render.symptomCard(sym, { flip: flipLast && i === game.shared.length - 1 }));
         } else {
-          var placeholder = ['Flop 1', 'Flop 2', 'Flop 3', 'Turn', 'River'][i] || '';
-          var slot = el('div', 'community-slot', i < 3 ? placeholder : placeholder);
+          var placeholder = ['Symptom 1', 'Symptom 2', 'Symptom 3', 'Symptom 4', 'Symptom 5'][i] || '';
+          var slot = el('div', 'symptom-slot', i < 3 ? placeholder : placeholder);
           slots.appendChild(slot);
         }
       }
       // phones show the board as a swipeable strip: bring a freshly dealt
-      // card into view so the turn and river are never dealt off-screen
+      // card into view so later symptoms are never revealed off-screen
       if (flipLast && slots.scrollWidth > slots.clientWidth + 4) {
-        var fresh = slots.children[game.community.length - 1];
+        var fresh = slots.children[game.shared.length - 1];
         if (fresh) {
           var left = slots.scrollLeft + 12 +
             fresh.getBoundingClientRect().right - slots.getBoundingClientRect().right;
@@ -221,15 +221,15 @@
       clear(handEl);
       var human = game.players[0];
       human.hand.forEach(function (c) {
-        var orderIdx = ui.showdownSel.indexOf(c.uid);
+        var orderIdx = ui.revealSel.indexOf(c.uid);
         var isPlayed = human.hasPlayed && human.playedCards &&
           human.playedCards.some(function (x) { return x.uid === c.uid; });
         var opts = {
-          selected: (ui.mode === 'showdown' && orderIdx !== -1) ||
+          selected: (ui.mode === 'reveal' && orderIdx !== -1) ||
                     (ui.mode === 'select-reroll' && ui.rerollSel.indexOf(c.uid) !== -1) ||
                     (ui.mode === 'select-give' && ui.tradeGive === c.uid) ||
                     isPlayed,
-          orderBadge: ui.mode === 'showdown' && orderIdx !== -1 ? orderIdx + 1 : null,
+          orderBadge: ui.mode === 'reveal' && orderIdx !== -1 ? orderIdx + 1 : null,
           rerollMark: ui.mode === 'select-reroll' && ui.rerollSel.indexOf(c.uid) === -1,
           dim: (ui.mode === 'select-give' && ui.tradeGive !== c.uid) ||
                (human.hasPlayed && !isPlayed),
@@ -239,10 +239,10 @@
           var cs = null, cm = null;
           if (isPlayed && human.lastResult) {
             human.lastResult.cardScores.forEach(function (x) {
-              if (x.uid === c.uid) { cs = x.chips; cm = x.mult; }
+              if (x.uid === c.uid) { cs = x.points; cm = x.mult; }
             });
           }
-          opts.finalChips = cs; opts.finalMult = cm;
+          opts.finalPoints = cs; opts.finalMult = cm;
         }
         handEl.appendChild(Render.toolkitCard(c, opts));
       });
@@ -255,7 +255,7 @@
     },
 
     calc: function (preview) {
-      document.getElementById('calc-chips').textContent = preview.chips;
+      document.getElementById('calc-points').textContent = preview.points;
       document.getElementById('calc-mult').textContent = preview.mult + '×';
       document.getElementById('calc-score').textContent = preview.score;
       var note = document.getElementById('calc-note');

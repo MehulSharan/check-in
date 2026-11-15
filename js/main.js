@@ -5,8 +5,8 @@
  * engine calls, and sequences the round loop with animations.
  *
  *   startGame → playRound ×3 → podium
- *   playRound: deal → ACTION_1 → [Turn] → ACTION_2 → [River] →
- *              SHOWDOWN (human scores, then bots) → lessons → results
+ *   playRound: deal → ACTION_1 → [4th symptom] → ACTION_2 → [5th symptom] →
+ *              REVEAL (human scores, then bots) → lessons → results
  *
  * The human always acts FIRST in each action phase (MVP simplification —
  * bots then respond, which keeps the demo pacey and judges in control).
@@ -28,9 +28,9 @@
 
   /* ---- UI state ----------------------------------------------------------- */
   var ui = {
-    mode: 'idle',                 // idle | select-reroll | select-give | select-target | select-take | showdown
+    mode: 'idle',                 // idle | select-reroll | select-give | select-target | select-take | reveal
     rerollSel: [],
-    showdownSel: [],
+    revealSel: [],
     tradeGive: null,
     tradeTarget: null,
     phaseText: '',
@@ -54,25 +54,25 @@
 
   /* ---- preview (live calculator) ------------------------------------------ */
   function computePreview() {
-    if (!game) { ui.preview = { chips: 0, mult: 1, score: 0, note: '' }; return; }
+    if (!game) { ui.preview = { points: 0, mult: 1, score: 0, note: '' }; return; }
     var human = game.players[0];
-    if (ui.mode === 'showdown' && !human.hasPlayed) {
-      var sel = ui.showdownSel.map(function (uid) {
+    if (ui.mode === 'reveal' && !human.hasPlayed) {
+      var sel = ui.revealSel.map(function (uid) {
         return human.hand.filter(function (c) { return c.uid === uid; })[0];
       }).filter(Boolean);
       var r = CheckIn.Scoring.scoreHand({
-        played: sel, board: game.community, trades: human.tradesThisRound,
+        played: sel, board: game.shared, trades: human.tradesThisRound,
       });
-      ui.preview = { chips: r.chips, mult: r.mult, score: r.score,
+      ui.preview = { points: r.points, mult: r.mult, score: r.score,
         note: 'your selection (' + sel.length + '/' + C.PLAYED_SIZE + ') — first pick plays first' };
     } else if (human.hand.length > 0 && !human.hasPlayed) {
-      var best = CheckIn.Scoring.bestPlay(human.hand, game.community, human.tradesThisRound);
+      var best = CheckIn.Scoring.bestPlay(human.hand, game.shared, human.tradesThisRound);
       if (best) {
-        ui.preview = { chips: best.result.chips, mult: best.result.mult, score: best.result.score,
+        ui.preview = { points: best.result.points, mult: best.result.mult, score: best.result.score,
           note: 'your best hand right now' };
       }
     } else {
-      ui.preview = { chips: 0, mult: 1, score: 0, note: '' };
+      ui.preview = { points: 0, mult: 1, score: 0, note: '' };
     }
   }
 
@@ -97,7 +97,7 @@
     bT.textContent = '🤝 Offer Trade';
     bK.textContent = '⏭️ Keep Hand';
     bP.disabled = true;
-    bP.textContent = '▶ Play Hand (' + ui.showdownSel.length + '/' + C.PLAYED_SIZE + ')';
+    bP.textContent = '▶ Play Hand (' + ui.revealSel.length + '/' + C.PLAYED_SIZE + ')';
 
     if (ui.mode === 'idle') {
       if (myTurn) bR.disabled = bT.disabled = bK.disabled = false;
@@ -115,8 +115,8 @@
     } else if (ui.mode === 'select-take') {
       bT.disabled = false; bT.textContent = '3/3 · their card…';
       bK.disabled = false; bK.textContent = '❌ Cancel';
-    } else if (ui.mode === 'showdown') {
-      bP.disabled = ui.showdownSel.length !== C.PLAYED_SIZE;
+    } else if (ui.mode === 'reveal') {
+      bP.disabled = ui.revealSel.length !== C.PLAYED_SIZE;
     }
   }
 
@@ -134,14 +134,14 @@
         var name = game.players[ui.tradeTarget] ? game.players[ui.tradeTarget].name : '';
         text = '🤝 Trading — tap the card you want from ' + name + "'s hand."; break;
       }
-      case 'showdown':
-        text = '🌊 Showdown! Pick ' + C.PLAYED_SIZE + ' of your ' + C.HAND_SIZE +
+      case 'reveal':
+        text = '🌊 Reveal! Pick ' + C.PLAYED_SIZE + ' of your ' + C.HAND_SIZE +
           ' cards to play. First pick plays first (matters vs Doomscrolling).'; break;
       default:
         if (game.inActionPhase() && !human.actedThisPhase) {
           text = 'Your action — 🔄 Reroll up to 2 cards, 🤝 Offer Trade (+2 Mult for BOTH traders), or ⏭️ Keep Hand.';
         } else if (game.state === 'SCORING') text = 'Scoring…';
-        else if (game.state === 'SHOWDOWN') text = 'Showdown…';
+        else if (game.state === 'REVEAL') text = 'Reveal…';
         else text = 'Your classmates are thinking…';
     }
     R.hint(text);
@@ -169,10 +169,10 @@
       ui.mode = 'select-target';
       render();
       reveal($('zone-opponents'));   // phones: classmates may be scrolled off-screen
-    } else if (ui.mode === 'showdown' && !game.players[0].hasPlayed) {
-      var j = ui.showdownSel.indexOf(card.uid);
-      if (j !== -1) ui.showdownSel.splice(j, 1);
-      else if (ui.showdownSel.length < C.PLAYED_SIZE) ui.showdownSel.push(card.uid);
+    } else if (ui.mode === 'reveal' && !game.players[0].hasPlayed) {
+      var j = ui.revealSel.indexOf(card.uid);
+      if (j !== -1) ui.revealSel.splice(j, 1);
+      else if (ui.revealSel.length < C.PLAYED_SIZE) ui.revealSel.push(card.uid);
       render();
     }
   };
@@ -250,7 +250,7 @@
       players: [{ name: 'You', isBot: false, emoji: '🫵' }].concat(
         C.BOTS.map(function (b) { return { name: b.name, isBot: true, emoji: b.emoji }; })),
     });
-    ui.mode = 'idle'; ui.rerollSel = []; ui.showdownSel = [];
+    ui.mode = 'idle'; ui.rerollSel = []; ui.revealSel = [];
     ui.tradeGive = null; ui.tradeTarget = null; ui.activeBot = null;
     $('real-help-footer').textContent = C.REAL_HELP_NOTE;
     R.screen('game');
@@ -262,10 +262,10 @@
 
   async function playRound() {
     game.startRound();
-    ui.mode = 'idle'; ui.rerollSel = []; ui.showdownSel = [];
+    ui.mode = 'idle'; ui.rerollSel = []; ui.revealSel = [];
     ui.phaseText = 'Dealing…';
     render();
-    await A.dealChildren($('community-slots'), 120);
+    await A.dealChildren($('symptom-slots'), 120);
     await A.dealChildren($('player-hand'), 55);
     var oppHands = document.querySelectorAll('#zone-opponents .opp-hand');
     Array.prototype.forEach.call(oppHands, function (h) { A.dealChildren(h, 35); });
@@ -274,18 +274,18 @@
     if (game.round === 0) await T.maybeAutoStart();   // first-load walkthrough
 
     await actionPhase(1);
-    ui.phaseText = 'Turn dealt!';
+    ui.phaseText = 'Fourth symptom revealed!';
     render();
-    R.board(game, true);            // flip the 4th community card
+    R.board(game, true);            // flip the 4th symptom card
     await A.sleep(900);
 
     await actionPhase(2);
-    ui.phaseText = 'River — Showdown!';
+    ui.phaseText = 'Final symptom — Reveal!';
     render();
-    R.board(game, true);            // flip the 5th community card
+    R.board(game, true);            // flip the 5th symptom card
     await A.sleep(900);
 
-    await showdownPhase();
+    await revealPhase();
   }
 
   async function actionPhase(n) {
@@ -313,13 +313,13 @@
     await A.sleep(400);
   }
 
-  async function showdownPhase() {
-    (window.__trace = window.__trace || []).push(['showdownPhase-enter', game.state]);
-    ui.phaseText = 'Showdown — pick 4 of your 6';
-    ui.mode = 'showdown';
-    ui.showdownSel = [];
+  async function revealPhase() {
+    (window.__trace = window.__trace || []).push(['revealPhase-enter', game.state]);
+    ui.phaseText = 'Reveal — pick 4 of your 6';
+    ui.mode = 'reveal';
+    ui.revealSel = [];
     render();
-    (window.__trace = window.__trace || []).push(['showdownPhase-await', game.state, 'waiting=' + !!humanResolve]);
+    (window.__trace = window.__trace || []).push(['revealPhase-await', game.state, 'waiting=' + !!humanResolve]);
     await awaitHuman();                    // human plays + sees scoring overlay
 
     for (var i = 1; i < game.players.length; i++) {
@@ -337,11 +337,11 @@
     await showRoundResults();
   }
 
-  /* ---- human showdown + scoring overlay ------------------------------------------- */
+  /* ---- human reveal + scoring overlay ------------------------------------------- */
 
   async function onPlayHand() {
-    if (ui.showdownSel.length !== C.PLAYED_SIZE) return;
-    var result = game.playHand(0, ui.showdownSel);
+    if (ui.revealSel.length !== C.PLAYED_SIZE) return;
+    var result = game.playHand(0, ui.revealSel);
     ui.mode = 'idle';
     render();
     A.pulse($('player-bank'));
@@ -357,8 +357,8 @@
     var cardsEl = modal.querySelector('#sc-cards');
     human.playedCards.forEach(function (c) {
       var cs = null, cm = null;
-      result.cardScores.forEach(function (x) { if (x.uid === c.uid) { cs = x.chips; cm = x.mult; } });
-      cardsEl.appendChild(R.toolkitCard(c, { finalChips: cs, finalMult: cm }));
+      result.cardScores.forEach(function (x) { if (x.uid === c.uid) { cs = x.points; cm = x.mult; } });
+      cardsEl.appendChild(R.toolkitCard(c, { finalPoints: cs, finalMult: cm }));
     });
 
     var linesEl = modal.querySelector('#bd-lines');
@@ -372,7 +372,7 @@
       var delta = document.createElement('span');
       delta.className = 'bd-delta';
       if (entry.mult) { delta.className += ' d-mult'; delta.textContent = (entry.mult > 0 ? '+' : '') + entry.mult + '×'; }
-      else if (entry.chips) { delta.className += ' d-chips'; delta.textContent = (entry.chips > 0 ? '+' : '') + entry.chips; }
+      else if (entry.points) { delta.className += ' d-points'; delta.textContent = (entry.points > 0 ? '+' : '') + entry.points; }
       else delta.textContent = '—';
       line.appendChild(label); line.appendChild(delta);
       line.style.animationDelay = delay + 'ms';
@@ -383,9 +383,9 @@
     // count-up finale
     var totalEl = modal.querySelector('#bd-total');
     await A.sleep(delay + 250);
-    await A.countUp(totalEl, 0, result.chips, 600, ' chips');
+    await A.countUp(totalEl, 0, result.points, 600, ' points');
     await A.sleep(120);
-    totalEl.textContent = result.chips + ' chips × ' + result.mult + '×';
+    totalEl.textContent = result.points + ' points × ' + result.mult + '×';
     await A.sleep(350);
     await A.countUp(totalEl, 0, result.score, 900, ' points!');
     A.pulse(totalEl);
@@ -400,7 +400,7 @@
 
   function showLessons() {
     return new Promise(function (res) {
-      var items = game.community.map(function (sym, i) {
+      var items = game.shared.map(function (sym, i) {
         return '<div class="lesson-item" style="animation-delay:' + (i * 140) + 'ms">' +
           '<div class="lesson-icon">' + sym.def.icon + '</div>' +
           '<div><div class="lesson-name">' + sym.def.name + '</div>' +
@@ -448,14 +448,14 @@
       return '<div style="text-align:center;margin:8px 0">' +
         '<div class="podium-medal">' + (medals[i] || '🏅') + '</div>' +
         '<b>' + game.players[p.idx].emoji + ' ' + p.name + '</b>' +
-        '<div style="color:#2f6db8;font-weight:900">' + p.bank + ' chips</div></div>';
+        '<div style="color:#2f6db8;font-weight:900">' + p.bank + ' points</div></div>';
     }).join('');
     var s = game.stats;
     return '<div style="text-align:center">' + list + '</div>' +
       '<div class="game-stats" style="justify-content:center">' +
-      '<span class="stat-chip">🤝 <b>' + s.trades + '</b> trades</span>' +
-      '<span class="stat-chip">🙋 <b>' + s.helpCardsPlayed + '</b> help-seeking plays</span>' +
-      '<span class="stat-chip">🧘 <b>' + s.selfCarePlayed + '</b> self-care plays</span>' +
+      '<span class="stat-pill">🤝 <b>' + s.trades + '</b> trades</span>' +
+      '<span class="stat-pill">🙋 <b>' + s.helpCardsPlayed + '</b> help-seeking plays</span>' +
+      '<span class="stat-pill">🧘 <b>' + s.selfCarePlayed + '</b> self-care plays</span>' +
       '</div>' +
       '<p style="text-align:center;color:#3e7cb1;font-size:0.8rem">' + C.REAL_HELP_NOTE + '</p>';
   }

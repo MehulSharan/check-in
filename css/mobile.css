@@ -80,7 +80,7 @@ html.tutorial-open { overflow: hidden; }
   .board-label { font-size: 0.76rem; margin-bottom: 5px; text-align: center; }
   .board-sub { display: none; }
   .board-label::after { content: "· swipe ↔"; font-weight: 500; opacity: 0.7; margin-left: 4px; }
-  #community-slots {
+  #symptom-slots {
     flex-wrap: nowrap;
     justify-content: flex-start;
     gap: 6px;
@@ -93,22 +93,22 @@ html.tutorial-open { overflow: hidden; }
     padding: 2px 10px 6px;
     scroll-padding: 0 10px;
   }
-  #community-slots::-webkit-scrollbar { display: none; }
-  .symptom-card, .community-slot {
+  #symptom-slots::-webkit-scrollbar { display: none; }
+  .symptom-card, .shared-slot {
     flex: 0 0 calc((100% - 12px) / 3.12);       /* 3 full cards + a peek of the 4th */
     width: auto;
     min-height: 0;
     scroll-snap-align: start;
   }
   .symptom-card { padding: 8px 7px 7px; }
-  .community-slot { min-height: 120px; }
+  .shared-slot { min-height: 120px; }
   .sym-name { font-size: 0.7rem; }
   .sym-row { margin-top: 5px; padding: 4px 5px; font-size: 0.62rem; line-height: 1.28; }
   .sym-row b { font-size: 0.54rem; }
 
   /* ---- live calculator + log ---- */
   #calculator { align-self: center; gap: 7px; margin-top: 6px; padding: 5px 14px; border-radius: 14px; max-width: 100%; }
-  .calc-chips, .calc-mult { font-size: 1.35rem; }
+  .calc-points, .calc-mult { font-size: 1.35rem; }
   .calc-score { font-size: 1.6rem; }
   .calc-op { font-size: 1rem; }
   #calc-note { font-size: 0.66rem; max-width: 118px; line-height: 1.2; }
@@ -169,8 +169,8 @@ html.tutorial-open { overflow: hidden; }
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  #action-bar[data-mode="showdown"] .btn:not(#btn-play-hand),
-  #action-bar:not([data-mode="showdown"]) #btn-play-hand,
+  #action-bar[data-mode="reveal"] .btn:not(#btn-play-hand),
+  #action-bar:not([data-mode="reveal"]) #btn-play-hand,
   #action-bar[data-mode^="select-"] .btn:disabled { display: none; }
   #real-help-footer { font-size: 0.68rem; padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); }
   #action-bar + #real-help-footer { padding-top: 6px; }
@@ -221,7 +221,7 @@ html.tutorial-open { overflow: hidden; }
 
 /* ---- very narrow phones (iPhone SE 1st gen, small Androids) ------------------ */
 @media (max-width: 350px) {
-  .symptom-card, .community-slot { flex-basis: calc((100% - 6px) / 2.15); }   /* 2 cards + a peek */
+  .symptom-card, .shared-slot { flex-basis: calc((100% - 6px) / 2.15); }   /* 2 cards + a peek */
   .tk-name { font-size: 0.64rem; }
   .tk-bonus { font-size: 0.58rem; }
   #player-hand .tk-value { font-size: 1.05rem; }
@@ -245,8 +245,8 @@ html.tutorial-open { overflow: hidden; }
   .opp-head { margin-bottom: 4px; }
   .mini-card { height: 46px; }
   #zone-board { padding: 8px 0 4px; }
-  #community-slots { flex-wrap: nowrap; }
-  .symptom-card, .community-slot { flex: 1 1 0; width: auto; min-width: 0; max-width: 170px; min-height: 0; }
+  #symptom-slots { flex-wrap: nowrap; }
+  .symptom-card, .shared-slot { flex: 1 1 0; width: auto; min-width: 0; max-width: 170px; min-height: 0; }
   #calculator { margin-top: 8px; padding: 4px 20px; }
   #event-log { min-height: 0; margin-top: 6px; }
   #event-log .log-line:not(.latest) { display: none; }

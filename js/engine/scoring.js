@@ -6,15 +6,15 @@
  * tests and the balance simulator.
  *
  * ORDER OF OPERATIONS (from the design spec — do not reorder casually):
- *   1. Load base values  (Self-Care → +Chips, Help-Seeking → +Mult)
+ *   1. Load base values  (Self-Care → +points, Help-Seeking → +Mult)
  *   2. Apply board DEBUFFS  (unless suppressed by a played card's `special`)
  *   3. Apply each played card's OWN conditional bonus
  *   4. Apply board RECOGNITION BONUSES
  *   5. Add the Trade bonus (+2 Mult per trade, max 2 stacks per round)
- *   6. Aggregate: per-card chips (zeroed cards = 0, floor 0 each) + flat
- *      chips → apply chip cap → floor chips at 0;  base 1× + per-card
+ *   6. Aggregate: per-card points (zeroed cards = 0, floor 0 each) + flat
+ *      points → apply point cap → floor points at 0;  base 1× + per-card
  *      mult + flat mult → apply mult lock → floor mult at 1.
- *   7. Final_Score = Total_Chips × Total_Mult
+ *   7. Final_Score = Total_points × Total_Mult
  *
  * WILD SUITS: every WILD toolkit card is assigned the real suit that
  * maximizes the final score (it "counts as any suit"). The engine brute-
@@ -25,10 +25,10 @@
  * API:
  *   CheckIn.Scoring.scoreHand({ played, board, trades, wildAssign? })
  *     played : [{ uid, def }] in SELECTION order (first = played first)
- *     board  : [{ uid, def }] the community symptom cards
+ *     board  : [{ uid, def }] the shared symptom cards
  *     trades : trades completed by this player this round (bonus caps at 2)
  *     wildAssign : optional { uid: 'SUIT' } to pin wild cards (used by tests)
- *     → { chips, mult, score, log: [...], wildAssign }
+ *     → { points, mult, score, log: [...], wildAssign }
  *
  *   CheckIn.Scoring.bestPlay(hand, board, trades)
  *     Evaluates every 4-of-6 combination (and, when Doomscrolling S08 is
@@ -43,54 +43,54 @@
 
   /* ------------------------------------------------------------------ */
   /* Mutation object — every hook writes through this, and it doubles as */
-  /* the score-breakdown log the UI shows after the Showdown.            */
+  /* the score-breakdown log the UI shows after the Reveal.            */
   /* ------------------------------------------------------------------ */
   function Mutation() {
-    this.cardChips = {};  // uid -> current chips (starts at def.chips)
+    this.cardPoints = {};  // uid -> current points (starts at def.points)
     this.cardMult = {};   // uid -> current mult  (starts at def.mult)
-    this.zeroed = {};     // uid -> label (final chip contribution = 0)
-    this.flatChips = [];  // { delta, label }
+    this.zeroed = {};     // uid -> label (final point contribution = 0)
+    this.flatPoints = [];  // { delta, label }
     this.flatMult = [];   // { delta, label }
-    this.chipCap = null;  // number | null
+    this.pointCap = null;  // number | null
     this.multLock = null; // number | null
     this.log = [];        // ordered breakdown entries
   }
   Mutation.prototype.logBase = function (card) {
-    this.cardChips[card.uid] = card.def.chips;
+    this.cardPoints[card.uid] = card.def.points;
     this.cardMult[card.uid] = card.def.mult;
     this.log.push({ kind: 'base', cardUid: card.uid, label: card.def.icon + ' ' + card.def.name,
-      chips: card.def.chips, mult: card.def.mult });
+      points: card.def.points, mult: card.def.mult });
   };
-  Mutation.prototype.addCardChips = function (uid, delta, label) {
-    this.cardChips[uid] = (this.cardChips[uid] || 0) + delta;
-    this.log.push({ kind: 'mod', cardUid: uid, label: label, chips: delta, mult: 0 });
+  Mutation.prototype.addCardPoints = function (uid, delta, label) {
+    this.cardPoints[uid] = (this.cardPoints[uid] || 0) + delta;
+    this.log.push({ kind: 'mod', cardUid: uid, label: label, points: delta, mult: 0 });
   };
   Mutation.prototype.addCardMult = function (uid, delta, label) {
     this.cardMult[uid] = (this.cardMult[uid] || 0) + delta;
-    this.log.push({ kind: 'mod', cardUid: uid, label: label, chips: 0, mult: delta });
+    this.log.push({ kind: 'mod', cardUid: uid, label: label, points: 0, mult: delta });
   };
-  Mutation.prototype.zeroCardChips = function (uid, label) {
+  Mutation.prototype.zeroCardPoints = function (uid, label) {
     this.zeroed[uid] = label;
-    this.log.push({ kind: 'zero', cardUid: uid, label: label, chips: 0, mult: 0 });
+    this.log.push({ kind: 'zero', cardUid: uid, label: label, points: 0, mult: 0 });
   };
-  Mutation.prototype.addChips = function (delta, label) {
-    this.flatChips.push({ delta: delta, label: label });
-    this.log.push({ kind: 'flat', label: label, chips: delta, mult: 0 });
+  Mutation.prototype.addPoints = function (delta, label) {
+    this.flatPoints.push({ delta: delta, label: label });
+    this.log.push({ kind: 'flat', label: label, points: delta, mult: 0 });
   };
   Mutation.prototype.addMult = function (delta, label) {
     this.flatMult.push({ delta: delta, label: label });
-    this.log.push({ kind: 'flat', label: label, chips: 0, mult: delta });
+    this.log.push({ kind: 'flat', label: label, points: 0, mult: delta });
   };
-  Mutation.prototype.capChipsAt = function (value, label) {
-    if (this.chipCap === null || value < this.chipCap) this.chipCap = value;
-    this.log.push({ kind: 'cap', label: label, chips: 0, mult: 0 });
+  Mutation.prototype.capPointsAt = function (value, label) {
+    if (this.pointCap === null || value < this.pointCap) this.pointCap = value;
+    this.log.push({ kind: 'cap', label: label, points: 0, mult: 0 });
   };
   Mutation.prototype.lockMultAt = function (value, label) {
     if (this.multLock === null || value < this.multLock) this.multLock = value;
-    this.log.push({ kind: 'lock', label: label, chips: 0, mult: 0 });
+    this.log.push({ kind: 'lock', label: label, points: 0, mult: 0 });
   };
   Mutation.prototype.logSuppress = function (sym, label) {
-    this.log.push({ kind: 'suppressed', label: label + ' — ' + sym.def.name, chips: 0, mult: 0 });
+    this.log.push({ kind: 'suppressed', label: label + ' — ' + sym.def.name, points: 0, mult: 0 });
   };
 
   /* ------------------------------------------------------------------ */
@@ -134,13 +134,13 @@
 
     // 2. board debuffs (with suppression) ----------------------------
     var ignoreAcademic = played.some(function (p) { return p.def.special === 'IGNORE_ACADEMIC_DEBUFFS'; });
-    var clearChipDebuffs = played.some(function (p) { return p.def.special === 'CLEAR_CHIP_DEBUFFS'; });
+    var clearPointDebuffs = played.some(function (p) { return p.def.special === 'CLEAR_POINT_DEBUFFS'; });
     board.forEach(function (sym) {
       if (!sym.def.debuff) return;
       if (ignoreAcademic && sym.def.suit === 'ACADEMIC') {
         m.logSuppress(sym, '🎓 Personal Tutor'); return;
       }
-      if (clearChipDebuffs && sym.def.debuffKind === 'chips') {
+      if (clearPointDebuffs && sym.def.debuffKind === 'points') {
         m.logSuppress(sym, '🛋️ Counselling'); return;
       }
       sym.def.debuff(ctx, m);
@@ -161,16 +161,16 @@
     if (stacks > 0) m.addMult(CONFIG.TRADE_BONUS_MULT * stacks, '🤝 Trade bonus × ' + stacks);
 
     // 6. aggregate ------------------------------------------------------
-    var chips = 0;
+    var points = 0;
     var cardScores = [];
     ctx.played.forEach(function (c) {
-      var cc = m.zeroed[c.uid] ? 0 : Math.max(0, m.cardChips[c.uid] || 0);
-      chips += cc;
-      cardScores.push({ uid: c.uid, defId: c.def.id, chips: cc, mult: m.cardMult[c.uid] || 0 });
+      var cc = m.zeroed[c.uid] ? 0 : Math.max(0, m.cardPoints[c.uid] || 0);
+      points += cc;
+      cardScores.push({ uid: c.uid, defId: c.def.id, points: cc, mult: m.cardMult[c.uid] || 0 });
     });
-    m.flatChips.forEach(function (f) { chips += f.delta; });
-    if (m.chipCap !== null) chips = Math.min(chips, m.chipCap);
-    chips = Math.max(chips, CONFIG.MIN_CHIPS);
+    m.flatPoints.forEach(function (f) { points += f.delta; });
+    if (m.pointCap !== null) points = Math.min(points, m.pointCap);
+    points = Math.max(points, CONFIG.MIN_POINTS);
 
     var mult = CONFIG.BASE_MULT;
     ctx.played.forEach(function (c) { mult += (m.cardMult[c.uid] || 0); });
@@ -179,17 +179,17 @@
     mult = Math.max(mult, CONFIG.MIN_MULT);
 
     // 7. final ----------------------------------------------------------
-    var score = chips * mult;
+    var score = points * mult;
     var wildsPlayed = ctx.played.filter(function (c) { return c.def.suit === 'WILD'; });
     if (wildsPlayed.length > 0) {
       var note = wildsPlayed.map(function (c) {
         return c.def.icon + ' ' + c.def.name + ' counted as ' + c.suit;
       }).join('; ');
-      m.log.push({ kind: 'wild', label: note, chips: 0, mult: 0 });
+      m.log.push({ kind: 'wild', label: note, points: 0, mult: 0 });
     }
-    m.log.push({ kind: 'result', label: 'Final', chips: chips, mult: mult, score: score });
+    m.log.push({ kind: 'result', label: 'Final', points: points, mult: mult, score: score });
 
-    return { chips: chips, mult: mult, score: score, log: m.log, wildAssign: assign, ctx: ctx,
+    return { points: points, mult: mult, score: score, log: m.log, wildAssign: assign, ctx: ctx,
       cardScores: cardScores };
   }
 
